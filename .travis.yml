@@ -16,7 +16,7 @@ env:
   - CKANVERSION=2.8
 
 # tests
-script: sh bin/travis-run.sh
+script: sh bin/travis-run.sh -e -x
 install:
   - bash bin/travis-build.bash
   - pip install coveralls
@@ -29,7 +29,7 @@ after_success:
 matrix:
   include:
     - name: "Flake8 on Python 3.7"
-      env: FLAKE8=true
+      dist: xenial    # required for Python 3.7
       cache: pip
       install: pip install flake8
       script:
@@ -37,4 +37,6 @@ matrix:
         - flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude ckan,ckanext-downloadall      # overwrite matrix
       python: 3.7
       # overwrite matrix
-      env: CKANVERSION=master
+      env:
+        - FLAKE8=true
+        - CKANVERSION=master
