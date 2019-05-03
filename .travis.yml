@@ -7,12 +7,6 @@ language: python
 dist: trusty
 group: deprecated-2017Q4
 
-# use stages, so that e.g. Python syntax errors are caught early
-stages:
-  - lint-essential-2.7
-  - test
-  - lint3.7
-
 # matrix
 python:
   - 2.7
@@ -21,49 +15,26 @@ env:
   - CKANVERSION=2.7
   - CKANVERSION=2.8
 
-# for tests
+# tests
 script: sh bin/travis-run.sh
 install:
   - bash bin/travis-build.bash
   - pip install coveralls
+services:
+  - postgresql
+  - redis-server
+after_success:
+  - coveralls
 
-jobs:
+matrix:
   include:
-    - stage: lint-essential-2.7
-      name: "Flake8 essentials"
+    - name: "Flake8 on Python 3.7"
       env: FLAKE8=true
       cache: pip
       install: pip install flake8
       script:
         - flake8 --version
-        # stop the build if there are Python syntax errors or undefined names
-        - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics --exclude ckan,ckanext-downloadall
+        - flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude ckan,ckanext-downloadall      # overwrite matrix
+      python: 3.7
       # overwrite matrix
-      env: CKANVERSION=master
-
-    - stage: test
-      services:
-        - postgresql
-        - redis-server
-      after_success:
-        - coveralls
-
-    - stage: lint-2.7
-      name: "Flake8 on Python 2.7"
-      env: FLAKE8=true
-      cache: pip
-      install: pip install flake8
-      script:
-        - flake8 --version
-        - flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude ckan,ckanext-downloadall      # overwrite matrix
-      env: CKANVERSION=master
-
-    - stage: lint-3.7
-      name: "Flake8 on Python 3.7"
-      env: FLAKE8=true
-      cache: pip
-      install: pip install flake8
-      script:
-        - flake8 --version
-        - flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude ckan,ckanext-downloadall      # overwrite matrix
       env: CKANVERSION=master
