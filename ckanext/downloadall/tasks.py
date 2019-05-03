@@ -13,6 +13,7 @@ from ckan.plugins.toolkit import get_action
 
 log = __import__('logging').getLogger(__name__)
 
+
 def update_zip(package_id):
 
     print('Updating zip')
@@ -56,6 +57,7 @@ def update_zip(package_id):
                         zipf.write(datafile.name, arcname=filename)
                 file_hash = hash_object.hexdigest()
                 # TODO optimize using the file_hash
+                file_hash
             # TODO deal with a dataset with no resources
 
             # write HTML index
@@ -77,7 +79,8 @@ def update_zip(package_id):
             #     if 'detected_format' in res:
             #         del res['detected_format']
 
-            # zipf.writestr('datapackage.json', json.dumps(datapackage, indent=4))
+            # zipf.writestr('datapackage.json',
+            #               json.dumps(datapackage, indent=4))
 
         statinfo = os.stat(fp.name)
         filesize = statinfo.st_size
@@ -105,7 +108,8 @@ def update_zip(package_id):
 
         # package_zip = PackageZip.get_for_package(package_id)
         # if not package_zip:
-        #     PackageZip.create(package_id, filepath, filesize, has_data=any_have_data)
+        #     PackageZip.create(package_id, filepath, filesize,
+        #                       has_data=any_have_data)
         #     log.info('Package zip created: %s', filepath)
         # else:
         #     package_zip.filepath = filepath
