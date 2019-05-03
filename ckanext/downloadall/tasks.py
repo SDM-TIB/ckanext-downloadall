@@ -21,7 +21,7 @@ def update_zip(package_id):
     context = {'model': model, 'session': model.Session}
     dataset = get_action('package_show')(context, {'id': package_id})
 
-    #'filename' = "{0}.zip".format(dataset['name'])
+    # 'filename' = "{0}.zip".format(dataset['name'])
     with tempfile.NamedTemporaryFile() as fp:
         with zipfile.ZipFile(fp, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) \
                 as zipf:
