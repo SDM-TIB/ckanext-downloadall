@@ -27,10 +27,14 @@ stages:
   - lint3.7
 
 # matrix
+python:
+  - 2.7
 env:
   - CKANVERSION=master
   - CKANVERSION=2.7
   - CKANVERSION=2.8
+
+script: sh bin/travis-run.sh
 
 jobs:
   include:
@@ -41,15 +45,12 @@ jobs:
       env: CKANVERSION=master
 
     - stage: test
-      python:
-        - "2.7"
       services:
         - postgresql
         - redis-server
       install:
         - bash bin/travis-build.bash
         - pip install coveralls
-      script: sh bin/travis-run.sh
       after_success:
         - coveralls
 
@@ -57,4 +58,5 @@ jobs:
       name: "Flake8 on Python 3.7"
       <<: *flake8-steps
       # overwrite matrix
+      python: 3.7
       env: CKANVERSION=master
