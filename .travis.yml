@@ -15,6 +15,12 @@ script: sh bin/travis-run.sh
 after_success:
   - coveralls
 
+# the new trusty images of Travis cause build errors with this psycopg2:
+# "Error: could not determine PostgreSQL version from '10.1'"
+# see https://github.com/travis-ci/travis-ci/issues/8897
+dist: trusty
+group: deprecated-2017Q4
+
 stages:
   - Flake8
   - test
