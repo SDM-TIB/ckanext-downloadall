@@ -20,8 +20,8 @@ flake8-steps: &flake8-steps
   script:
     - true
 
-# use stages so lint errors fail early
-jobs:
+# use stages, so that e.g. Python syntax errors are caught early
+stages:
   - lint2.7
   - test
   - lint3.7
