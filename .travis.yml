@@ -1,6 +1,6 @@
 language: python
 
-# use an older trust image, because the newer images cause build errors with
+# use an older trusty image, because the newer images cause build errors with
 # psycopg2 that comes with CKAN<2.8:
 #   "Error: could not determine PostgreSQL version from '10.1'"
 # see https://github.com/travis-ci/travis-ci/issues/8897
@@ -26,6 +26,7 @@ services:
 after_success:
   - coveralls
 
+# additional jobs
 matrix:
   include:
     - name: "Flake8 on Python 3.7"
