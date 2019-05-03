@@ -16,7 +16,7 @@ env:
   - CKANVERSION=2.8
 
 # tests
-script: sh bin/travis-run.sh -e -x
+script: sh bin/travis-run.sh
 install:
   - bash bin/travis-build.bash
   - pip install coveralls

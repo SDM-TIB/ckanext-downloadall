@@ -1,4 +1,5 @@
 #!/bin/sh -e
+set -ex
 
 flake8 --version
 # stop the build if there are Python syntax errors or undefined names
