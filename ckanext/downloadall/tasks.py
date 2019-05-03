@@ -116,26 +116,3 @@ def update_zip(package_id):
 
         #     model.Session.add(package_zip)
         #     model.Session.commit()
-
-def upload_file(dataset_id, username, logic_function='resource_create'):
-    url = toolkit.url_for(
-        controller='api',
-        action='action',
-        logic_function=logic_function, ver='/3')
-    env = {'REMOTE_USER': username.encode('ascii')}
-    postparams = {
-        'name': 'test-flask-upload',
-        'package_id': dataset_id,
-    }
-    upload_content = 'test-content'
-    upload_info = ('upload', 'test-upload.txt', upload_content)
-    app = self._get_test_app()
-    resp = app.post(
-        url, params=postparams,
-        upload_files=[upload_info],
-        extra_environ=env
-        # content_type= 'application/json'
-    )
-    result = resp.json['result']
-    eq_('upload', result['url_type'])
-    eq_(len(upload_content), result['size'])
