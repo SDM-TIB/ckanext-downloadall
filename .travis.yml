@@ -20,29 +20,41 @@ flake8-steps: &flake8-steps
   script:
     - true
 
-python:
-  - "2.7"
+# use stages so lint errors fail early
+jobs:
+  - lint2.7
+  - test
+  - lint3.7
+
+# matrix
 env:
   - CKANVERSION=master
   - CKANVERSION=2.7
   - CKANVERSION=2.8
-services:
-  - postgresql
-  - redis-server
-install:
-  - bash bin/travis-build.bash
-  - pip install coveralls
-script: sh bin/travis-run.sh
-after_success:
-  - coveralls
 
-matrix:
+jobs:
   include:
-    - python: "2.7"
-      name: "Flake8 on python 2.7"
+    - stage: lint2.7
+      name: "Flake8 on Python 2.7"
       <<: *flake8-steps
+      # overwrite matrix
+      env: CKANVERSION=master
 
-    - python: "3.7"
-      name: "Flake8 on python 3.7"
-      dist: xenial    # required for Python 3.7
+    - stage: test
+      python:
+        - "2.7"
+      services:
+        - postgresql
+        - redis-server
+      install:
+        - bash bin/travis-build.bash
+        - pip install coveralls
+      script: sh bin/travis-run.sh
+      after_success:
+        - coveralls
+
+    - stage: lint3.7
+      name: "Flake8 on Python 3.7"
       <<: *flake8-steps
+      # overwrite matrix
+      env: CKANVERSION=master
