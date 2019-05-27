@@ -5,23 +5,20 @@
 .. image:: https://travis-ci.org/davidread/ckanext-downloadall.svg?branch=master
     :target: https://travis-ci.org/davidread/ckanext-downloadall
 
-.. image:: https://coveralls.io/repos/davidread/ckanext-downloadall/badge.svg
-  :target: https://coveralls.io/r/davidread/ckanext-downloadall
-
 .. image:: https://img.shields.io/pypi/v/ckanext-downloadall.svg
-    :target: https://pypi.python.org/pypi/ckanext-downloadall/
+    :target: https://pypi.python.org/project/ckanext-downloadall/
     :alt: Latest Version
 
 .. image:: https://img.shields.io/pypi/pyversions/ckanext-downloadall.svg
-    :target: https://pypi.python.org/pypi/ckanext-downloadall/
+    :target: https://pypi.python.org/project/ckanext-downloadall/
     :alt: Supported Python versions
 
 .. image:: https://img.shields.io/pypi/status/ckanext-downloadall.svg
-    :target: https://pypi.python.org/pypi/ckanext-downloadall/
+    :target: https://pypi.python.org/project/ckanext-downloadall/
     :alt: Development Status
 
 .. image:: https://img.shields.io/pypi/l/ckanext-downloadall.svg
-    :target: https://pypi.python.org/pypi/ckanext-downloadall/
+    :target: https://pypi.python.org/project/ckanext-downloadall/
     :alt: License
 
 ===================
