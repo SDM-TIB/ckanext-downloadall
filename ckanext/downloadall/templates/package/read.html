@@ -5,7 +5,7 @@
     <a href="{% url_for 'export_datapackage', package_id=pkg.name %}"
        class='btn' id='export_datapackage_button'> -->
 
-  {% set zip_res = h.downloadall__get_zip_resource(pkg.resources) %}
+  {% set zip_res, non_zip_resources = h.downloadall__separate_off_zip_resource(pkg.resources) %}
 
   <div class="btn-group" style="float:right; margin-right: -7px;">
     {% if zip_res %}
@@ -18,5 +18,7 @@
   </div>
   <div class="clearfix"></div>
 
-  {{ super() }}
+  {# pass only the non_zip_resources (otherwise it is the same as in the original block 'package_resources') #}
+  {% snippet "package/snippets/resources_list.html", pkg=pkg, resources=non_zip_resources, is_activity_archive=is_activity_archive %}
+
 {% endblock %}

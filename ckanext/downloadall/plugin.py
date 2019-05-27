@@ -84,5 +84,6 @@ class DownloadallPlugin(plugins.SingletonPlugin):
 
     def get_helpers(self):
         return {
-            'downloadall__get_zip_resource': helpers.get_zip_resource,
+            'downloadall__separate_off_zip_resource':
+            helpers.separate_off_zip_resource,
         }
