@@ -35,6 +35,8 @@ ckanext-downloadall
 This CKAN extension adds a "Download All" button to datasets. This downloads
 a zip file containing all the resource files as well as a datapackage.json.
 
+.. image:: demo.png
+
 The datapackage.json is a [Frictionless Data] standard, also known as a Data
 Package.
 
