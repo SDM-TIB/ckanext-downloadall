@@ -1,9 +1,14 @@
-def separate_off_zip_resource(resources):
+def pop_zip_resource(pkg):
+    '''Finds the zip resource in a package's resources, removes it from the
+    package and returns it. NB the package doesn't have the zip resource in it
+    any more.
+    '''
     zip_res = None
     non_zip_resources = []
-    for res in resources:
-        if res['name'] == u'All resource data':
+    for res in pkg['resources']:
+        if res.get('downloadall_metadata_modified'):
             zip_res = res
         else:
             non_zip_resources.append(res)
-    return zip_res, non_zip_resources
+    pkg['resources'] = non_zip_resources
+    return zip_res
