@@ -30,8 +30,9 @@ a zip file containing all the resource files and a datapackage.json.
 
 .. image:: demo.png
 
-The datapackage.json is a [Frictionless Data] standard, also known as a Data
-Package.
+The `datapackage.json <https://frictionlessdata.io/specs/data-package/>`_ is a
+`Frictionless Data <https://frictionlessdata.io/specs/data-package/>`_
+standard, also known as a Data Package.
 
 If the resource is pushed/xloaded to Datastore then the schema (column types)
 are included in the datapackage.json file.
@@ -41,9 +42,9 @@ dataset is created or updated. This suits CKANs where all files are uploaded -
 if the underlying data file changes without CKAN knowing about it, then the zip
 will not include the update.
 
-(This extension is inspired by
-[ckanext-packagezip](https://github.com/datagovuk/ckanext-packagezip), but that
-is old and relied on ckanext-archiver and IPipe.)
+(This extension is inspired by `ckanext-packagezip
+<https://github.com/datagovuk/ckanext-packagezip>`_, but that is old and relied
+on ckanext-archiver and IPipe.)
 
 ------------
 Requirements
@@ -137,17 +138,25 @@ To publish a new version to PyPI follow these steps:
    See `PEP 440 <http://legacy.python.org/dev/peps/pep-0440/#public-version-identifiers>`_
    for how to choose version numbers.
 
-2. Create a source and binary distributions of the new version::
+2. Make sure you have the latest version of necessary packages::
+
+    pip install --upgrade setuptools wheel twine
+
+3. Create a source and binary distributions of the new version::
 
        python setup.py sdist bdist_wheel && twine check dist/*
 
    Fix any errors you get.
 
-3. Upload the source distribution to PyPI::
+4. Upload the source distribution to PyPI::
 
        twine upload dist/*
 
-4. Tag the new release of the project on GitHub with the version number from
+5. Commit any outstanding changes::
+
+       git commit -a
+
+6. Tag the new release of the project on GitHub with the version number from
    the ``setup.py`` file. For example if the version number in ``setup.py`` is
    0.0.1 then do::
 
