@@ -1,6 +1,4 @@
 """Tests for plugin.py."""
-from nose.tools import assert_equal
-
 from ckan.tests import factories
 from ckan.tests import helpers
 from ckan import plugins as p
@@ -31,7 +29,7 @@ class TestDatastoreCreate(object):
                             force=True)
 
         # Check the chained action caused the zip to be queued for update
-        assert_equal(
+        assert (
             [job['title'] for job in helpers.call_action('job_list')],
             ['DownloadAll datastore_create "{}" {}'
              .format(dataset['name'], dataset['id'])])

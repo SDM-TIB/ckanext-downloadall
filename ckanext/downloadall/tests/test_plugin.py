@@ -1,5 +1,4 @@
 """Tests for plugin.py."""
-from nose.tools import assert_equal
 
 from ckan.tests import factories
 from ckan.tests import helpers
@@ -22,7 +21,7 @@ class TestNotify(object):
     def test_new_resource_leads_to_queued_task(self):
         dataset = factories.Dataset(resources=[
             {'url': 'http://some.image.png', 'format': 'png'}])
-        assert_equal(
+        assert (
             [job['title'] for job in helpers.call_action('job_list')],
             ['DownloadAll new "{}" {}'
              .format(dataset['name'], dataset['id'])])
@@ -35,7 +34,7 @@ class TestNotify(object):
         dataset['resources'][0]['url'] = 'http://another.image.png'
         helpers.call_action('package_update', **dataset)
 
-        assert_equal(
+        assert (
             [job['title'] for job in helpers.call_action('job_list')],
             ['DownloadAll changed "{}" {}'
              .format(dataset['name'], dataset['id'])])
@@ -48,7 +47,7 @@ class TestNotify(object):
         dataset['resources'] = []
         helpers.call_action('package_update', **dataset)
 
-        assert_equal(
+        assert (
             [job['title'] for job in helpers.call_action('job_list')],
             ['DownloadAll changed "{}" {}'
              .format(dataset['name'], dataset['id'])])
@@ -63,7 +62,7 @@ class TestNotify(object):
         dataset = helpers.call_action('package_create', **dataset)
         # this should prompt datapackage.json to be updated
 
-        assert_equal(
+        assert (
             [job['title'] for job in helpers.call_action('job_list')],
             ['DownloadAll new "{}" {}'
              .format(dataset['name'], dataset['id'])])
@@ -77,7 +76,7 @@ class TestNotify(object):
         helpers.call_action('package_update', **dataset)
         # this should prompt datapackage.json to be updated
 
-        assert_equal(
+        assert (
             [job['title'] for job in helpers.call_action('job_list')],
             ['DownloadAll changed "{}" {}'
              .format(dataset['name'], dataset['id'])])
@@ -96,7 +95,7 @@ class TestNotify(object):
         }
         helpers.call_action('resource_create', **resource)
 
-        assert_equal(
+        assert (
             [job['title'] for job in helpers.call_action('job_list')],
             ['DownloadAll changed "{}" {}'
              .format(dataset['name'], dataset['id'])])
@@ -105,11 +104,11 @@ class TestNotify(object):
         factories.User()
         factories.Organization()
         factories.Group()
-        assert_equal(
+        assert (
             [job['title'] for job in helpers.call_action('job_list')],
             [])
 
-        assert_equal(list(helpers.call_action('job_list')), [])
+        assert (list(helpers.call_action('job_list')), [])
 
     # An end-to-end test is too tricky to write - creating a dataset and seeing
     # the zip file created requires the queue worker to run, but that rips down

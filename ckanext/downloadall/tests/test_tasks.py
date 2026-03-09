@@ -6,7 +6,6 @@ import re
 import copy
 
 import mock
-from nose.tools import assert_equal
 from pyfakefs import fake_filesystem
 import responses
 import requests
@@ -26,7 +25,6 @@ fs = fake_filesystem.FakeFilesystem()
 fake_os = fake_filesystem.FakeOsModule(fs)
 fake_open = fake_filesystem.FakeFileOpen(fs)
 
-eq = assert_equal
 
 
 def mock_open_if_open_fails(*args, **kwargs):
@@ -89,18 +87,18 @@ class TestUpdateZip(object):
         dataset = helpers.call_action('package_show', id=dataset['id'])
         zip_resources = [res for res in dataset['resources']
                          if res['name'] == 'All resource data']
-        assert_equal(len(zip_resources), 1)
+        assert (len(zip_resources), 1)
         zip_resource = zip_resources[0]
-        assert_equal(zip_resource['url_type'], 'upload')
+        assert (zip_resource['url_type'], 'upload')
 
         uploader = ckan.lib.uploader.get_resource_uploader(zip_resource)
         filepath = uploader.get_path(zip_resource['id'])
         csv_filename_in_zip = '{}.csv'.format(dataset['resources'][0]['id'])
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
-                assert_equal(zip_.namelist(),
+                assert (zip_.namelist(),
                              [csv_filename_in_zip, 'datapackage.json'])
-                assert_equal(zip_.read(csv_filename_in_zip), 'a,b,c')
+                assert (zip_.read(csv_filename_in_zip), 'a,b,c')
                 datapackage_json = zip_.read('datapackage.json')
                 assert datapackage_json.startswith('{\n  "description"')
                 datapackage = json.loads(datapackage_json)
@@ -136,7 +134,7 @@ class TestUpdateZip(object):
         dataset = helpers.call_action('package_show', id=dataset['id'])
         zip_resources = [res for res in dataset['resources']
                          if res['name'] == 'All resource data']
-        assert_equal(len(zip_resources), 1)
+        assert (len(zip_resources), 1)
 
     @helpers.change_config('ckan.storage_path', '/doesnt_exist')
     @responses.activate
@@ -261,9 +259,9 @@ class TestUpdateZip(object):
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
                 # Check uploaded file
-                assert_equal(zip_.namelist(),
+                assert (zip_.namelist(),
                              [csv_filename_in_zip, 'datapackage.json'])
-                assert_equal(zip_.read(csv_filename_in_zip), 'Test,csv')
+                assert (zip_.read(csv_filename_in_zip), 'Test,csv')
                 # Check datapackage.json
                 datapackage_json = zip_.read('datapackage.json')
                 datapackage = json.loads(datapackage_json)
@@ -297,16 +295,16 @@ class TestUpdateZip(object):
         dataset = helpers.call_action('package_show', id=dataset['id'])
         zip_resources = [res for res in dataset['resources']
                          if res['name'] == 'All resource data']
-        assert_equal(len(zip_resources), 1)
+        assert (len(zip_resources), 1)
         zip_resource = zip_resources[0]
-        assert_equal(zip_resource['url_type'], 'upload')
+        assert (zip_resource['url_type'], 'upload')
 
         uploader = ckan.lib.uploader.get_resource_uploader(zip_resource)
         filepath = uploader.get_path(zip_resource['id'])
         csv_filename_in_zip = '{}.csv'.format(dataset['resources'][0]['id'])
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
-                assert_equal(zip_.namelist(),
+                assert (zip_.namelist(),
                              [csv_filename_in_zip, 'datapackage.json'])
                 datapackage_json = zip_.read('datapackage.json')
                 assert datapackage_json.startswith('{\n  "description"')
@@ -341,7 +339,7 @@ class TestUpdateZip(object):
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
                 # Zip doesn't contain the data, just the json file
-                assert_equal(zip_.namelist(),
+                assert (zip_.namelist(),
                              ['datapackage.json'])
                 # Check datapackage.json
                 datapackage_json = zip_.read('datapackage.json')
@@ -380,7 +378,7 @@ class TestUpdateZip(object):
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
                 # Zip doesn't contain the data, just the json file
-                assert_equal(zip_.namelist(),
+                assert (zip_.namelist(),
                              ['datapackage.json'])
                 # Check datapackage.json
                 datapackage_json = zip_.read('datapackage.json')

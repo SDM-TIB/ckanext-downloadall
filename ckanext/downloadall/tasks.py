@@ -19,7 +19,7 @@ log = __import__('logging').getLogger(__name__)
 
 def update_zip(package_id, skip_if_no_changes=True):
     '''
-    Create/update the a dataset's zip resource, containing the other resources
+    Create/update a dataset's zip resource, containing the other resources
     and some metadata.
 
     :param skip_if_no_changes: If true, and there is an existing zip for this
