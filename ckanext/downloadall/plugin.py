@@ -7,9 +7,9 @@ from ckan.lib.plugins import DefaultTranslation
 
 from ckan import model
 
-from tasks import update_zip
-import helpers
-import action
+from .tasks import update_zip
+from . import helpers
+from . import action
 
 
 log = __import__('logging').getLogger(__name__)
@@ -33,7 +33,7 @@ class DownloadallPlugin(plugins.SingletonPlugin, DefaultTranslation):
     # IDomainObjectModification
 
     def notify(self, entity, operation):
-        u'''
+        '''
         Send a notification on entity modification.
 
         :param entity: instance of module.Package.
@@ -42,7 +42,7 @@ class DownloadallPlugin(plugins.SingletonPlugin, DefaultTranslation):
         if operation == 'deleted':
             return
 
-        log.debug(u'{} {} \'{}\''
+        log.debug('{} {} \'{}\''
                   .format(operation, type(entity).__name__, entity.name))
         # We should regenerate zip if these happen:
         # 1 change of title, description etc (goes into package.json)
@@ -84,7 +84,7 @@ class DownloadallPlugin(plugins.SingletonPlugin, DefaultTranslation):
 
     def before_index(self, pkg_dict):
         try:
-            if u'All resource data' in pkg_dict['res_name']:
+            if 'All resource data' in pkg_dict['res_name']:
                 # we've got a 'Download all zip', so remove it's ZIP from the
                 # SOLR facet of resource formats, as it's not really a data
                 # resource
@@ -115,7 +115,7 @@ def enqueue_update_zip(dataset_name, dataset_id, operation):
             if not job['title']:
                 continue
             match = re.match(
-                r'DownloadAll \w+ "[^"]*" ([\w-]+)', job[u'title'])
+                r'DownloadAll \w+ "[^"]*" ([\w-]+)', job['title'])
             if match:
                 queued_dataset_id = match.groups()[0]
                 if dataset_id == queued_dataset_id:
@@ -124,11 +124,11 @@ def enqueue_update_zip(dataset_name, dataset_id, operation):
                     return
 
     # add this dataset to the queue
-    log.debug(u'Queuing job update_zip: {} {}'
+    log.debug('Queuing job update_zip: {} {}'
               .format(operation, dataset_name))
 
     toolkit.enqueue_job(
         update_zip, [dataset_id],
-        title=u'DownloadAll {} "{}" {}'.format(operation, dataset_name,
+        title='DownloadAll {} "{}" {}'.format(operation, dataset_name,
                                                dataset_id),
         queue=queue)
