@@ -1,7 +1,7 @@
 import ckan.plugins as p
 from ckan import model
 
-import plugin
+from . import plugin
 
 
 @p.toolkit.chained_action  # requires CKAN 2.7+

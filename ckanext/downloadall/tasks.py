@@ -44,7 +44,7 @@ def update_zip(package_id, skip_if_no_changes=True):
                  'changed sufficiently: {}'.format(dataset['name']))
         return
 
-    prefix = "{}-".format(dataset[u'name'])
+    prefix = "{}-".format(dataset['name'])
     with tempfile.NamedTemporaryFile(prefix=prefix, suffix='.zip') as fp:
         write_zip(fp, datapackage, ckan_and_datapackage_resources)
 
@@ -55,8 +55,8 @@ def update_zip(package_id, skip_if_no_changes=True):
             package_id=dataset['id'],
             url='dummy-value',
             upload=fp,
-            name=u'All resource data',
-            format=u'ZIP',
+            name='All resource data',
+            format='ZIP',
             downloadall_metadata_modified=dataset['metadata_modified'],
             downloadall_datapackage_hash=hash_datapackage(datapackage)
         )
@@ -103,7 +103,7 @@ def make_hashable(obj):
     if isinstance(obj, (tuple, list)):
         return tuple((make_hashable(e) for e in obj))
     if isinstance(obj, dict):
-        return tuple(sorted((k, make_hashable(v)) for k, v in obj.items()))
+        return tuple(sorted((k, make_hashable(v)) for k, v in list(obj.items())))
     return obj
 
 
@@ -163,8 +163,8 @@ def generate_datapackage_json(package_id):
 
     # populate datapackage with the schema from the Datastore data
     # dictionary
-    ckan_and_datapackage_resources = zip(resources_to_include,
-                                         datapackage.get('resources', []))
+    ckan_and_datapackage_resources = list(zip(resources_to_include,
+                                         datapackage.get('resources', [])))
     for res, datapackage_res in ckan_and_datapackage_resources:
         ckanapi.datapackage.populate_datastore_res_fields(
             ckan=local_ckan, res=res)
@@ -173,8 +173,8 @@ def generate_datapackage_json(package_id):
 
     # add in any other dataset fields, if configured
     fields_to_include = config.get(
-        u'ckanext.downloadall.dataset_fields_to_add_to_datapackage',
-        u'').split()
+        'ckanext.downloadall.dataset_fields_to_add_to_datapackage',
+        '').split()
     for key in fields_to_include:
         datapackage[key] = dataset.get(key)
 
