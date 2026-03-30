@@ -258,7 +258,7 @@ def download_resource_into_zip(url, filename, zipf):
     size = 0
     try:
         # python3 syntax - stream straight into the zip
-        with zipf.open(filename, 'wb') as zf:
+        with zipf.open(filename, 'w') as zf:
             for chunk in r.iter_content(chunk_size=128):
                 zf.write(chunk)
                 hash_object.update(chunk)
