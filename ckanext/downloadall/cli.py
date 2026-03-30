@@ -1,18 +1,6 @@
 # encoding: utf-8
 
 import click
-
-try:
-    # CKAN 2.9+
-    from ckan.cli import (
-        click_config_option, load_config
-    )
-except ImportError:
-    # CKAN 2.7, 2.8
-    from ckan.lib.cli import click_config_option
-    from ckan.lib.cli import _get_config as load_config
-
-from ckan.config.middleware import make_app
 import ckan.plugins.toolkit as toolkit
 from ckan import model
 from ckan.lib.jobs import DEFAULT_QUEUE_NAME
@@ -20,40 +8,14 @@ from ckan.lib.jobs import DEFAULT_QUEUE_NAME
 from . import tasks
 
 
-class MockTranslator(object):
-    def gettext(self, value):
-        return value
-
-    def ugettext(self, value):
-        return value
-
-    def ungettext(self, singular, plural, n):
-        if n > 1:
-            return plural
-        return singular
+def get_commands():
+    return [cli]
 
 
-class CkanCommand(object):
-
-    def __init__(self, conf=None):
-        self.config = load_config(conf)
-
-        # package_update needs a translator defined i.e. _()
-        from paste.registry import Registry
-        import pylons
-        registry = Registry()
-        registry.prepare()
-        registry.register(pylons.translator, MockTranslator())
-
-        self.app = make_app(self.config.global_conf, **self.config.local_conf)
-
-
-@click.group()
+@click.group('downloadall')
 @click.help_option('-h', '--help')
-@click_config_option
-@click.pass_context
-def cli(ctx, config, *args, **kwargs):
-    ctx.obj = CkanCommand(config)
+def cli():
+    pass
 
 
 @cli.command('update-zip', short_help='Update zip file for a dataset')
@@ -62,9 +24,9 @@ def cli(ctx, config, *args, **kwargs):
               help='Do it in the same process (not the worker)',
               is_flag=True)
 def update_zip(dataset_ref, synchronous):
-    ''' update-zip <package-name>
+    """ update-zip <package-name>
 
-    Generates zip file for a dataset, downloading its resources.'''
+    Generates zip file for a dataset, downloading its resources."""
     if synchronous:
         tasks.update_zip(dataset_ref)
     else:
@@ -83,9 +45,9 @@ def update_zip(dataset_ref, synchronous):
               help='Do it in the same process (not the worker)',
               is_flag=True)
 def update_all_zips(synchronous):
-    ''' update-all-zips <package-name>
+    """ update-all-zips <package-name>
 
-    Generates zip file for all datasets. It is done synchronously.'''
+    Generates zip file for all datasets. It is done synchronously."""
     context = {'model': model, 'session': model.Session}
     datasets = toolkit.get_action('package_list')(context, {})
     for i, dataset_name in enumerate(datasets):

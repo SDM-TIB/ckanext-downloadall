@@ -10,6 +10,7 @@ from ckan import model
 from .tasks import update_zip
 from . import helpers
 from . import action
+from . import cli
 
 
 log = __import__('logging').getLogger(__name__)
@@ -22,6 +23,12 @@ class DownloadallPlugin(plugins.SingletonPlugin, DefaultTranslation):
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.IActions)
+    plugins.implements(plugins.IClick)
+
+    # IClick
+
+    def get_commands(self):
+        return cli.get_commands()
 
     # IConfigurer
 
