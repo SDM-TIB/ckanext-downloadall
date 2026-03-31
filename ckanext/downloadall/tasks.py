@@ -197,6 +197,9 @@ def write_zip(fp, datapackage, ckan_and_datapackage_resources):
             log.debug('Downloading resource {}/{}: {}'
                       .format(i, len(ckan_and_datapackage_resources),
                               res['url']))
+            # ckanapi.datapackage.resource_filename() requires 'format' to be
+            # present; default to empty string when the resource has none.
+            dres.setdefault('format', '')
             filename = \
                 ckanapi.datapackage.resource_filename(dres)
             try:
@@ -256,23 +259,11 @@ def download_resource_into_zip(url, filename, zipf):
 
     hash_object = hashlib.md5()
     size = 0
-    try:
-        # python3 syntax - stream straight into the zip
-        with zipf.open(filename, 'w') as zf:
-            for chunk in r.iter_content(chunk_size=128):
-                zf.write(chunk)
-                hash_object.update(chunk)
-                size += len(chunk)
-    except RuntimeError:
-        # python2 syntax - need to save to disk first
-        with tempfile.NamedTemporaryFile() as datafile:
-            for chunk in r.iter_content(chunk_size=128):
-                datafile.write(chunk)
-                hash_object.update(chunk)
-                size += len(chunk)
-            datafile.flush()
-            # .write() streams the file into the zip
-            zipf.write(datafile.name, arcname=filename)
+    with zipf.open(filename, 'w') as zf:
+        for chunk in r.iter_content(chunk_size=128):
+            zf.write(chunk)
+            hash_object.update(chunk)
+            size += len(chunk)
     file_hash = hash_object.hexdigest()
     log.debug('Downloaded {}, hash: {}'
               .format(format_bytes(size), file_hash))

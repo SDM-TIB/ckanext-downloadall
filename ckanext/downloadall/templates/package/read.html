@@ -1,22 +1,19 @@
 {% ckan_extends %}
-
 {% block package_resources %}
-
   {% if pkg.resources %}
     <div class="btn-group" style="float:right; margin-top: -7px;">
-
+      {# Pop the pre-generated zip resource so it doesn't appear in the resource list below. #}
       {% set zip_res = h.downloadall__pop_zip_resource(pkg) %}
-      {% if zip_res %}
-        <a class="btn btn-primary resource-url-analytics resource-type-{{ zip_res.resource_type }}" href="{{ zip_res.url }}">
-      {% else %}
-        <a class="btn btn-primary" disabled="disabled" title="{{ _('This download is not currently available') }}" href="#">
-      {% endif %}
-          <i class="fa fa-arrow-circle-o-down"></i> {{ _('Download all') }}
-        </a>
 
+      {% set download_url = h.url_for('downloadall_stream.download_all', dataset_id=pkg.name) %}
+      <a class="btn btn-primary resource-url-analytics"
+         href="{{ download_url }}"
+         {% if h.downloadall_is_streaming(pkg) %}
+           title="{{ _('This archive is generated on the fly and may take a moment to start downloading.') }}"
+         {% endif %}>
+        <i class="fa fa-arrow-circle-o-down"></i> {{ _('Download all') }}
+      </a>
     </div>
   {% endif %}
-
   {{ super() }}
-
 {% endblock %}

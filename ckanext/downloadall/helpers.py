@@ -12,3 +12,15 @@ def pop_zip_resource(pkg):
             non_zip_resources.append(res)
     pkg['resources'] = non_zip_resources
     return zip_res
+
+
+def is_streaming(pkg):
+    '''Jinja2 helper: returns True when a dataset is large enough that its
+    "Download all" ZIP will be streamed on demand rather than served from a
+    pre-generated file stored in the filestore.
+
+    Usage in templates:
+        {% if h.downloadall_is_streaming(pkg) %} … {% endif %}
+    '''
+    from ckanext.downloadall.streaming import should_stream
+    return should_stream(pkg)
