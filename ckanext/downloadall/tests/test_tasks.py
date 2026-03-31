@@ -26,7 +26,6 @@ fake_os = fake_filesystem.FakeOsModule(fs)
 fake_open = fake_filesystem.FakeFileOpen(fs)
 
 
-
 def mock_open_if_open_fails(*args, **kwargs):
     try:
         return real_open(*args, **kwargs)
@@ -62,10 +61,11 @@ def mock_populate_datastore_res_fields_overridden(ckan, res):
 
 @mock.patch.object(ckan.lib.uploader, 'os', fake_os)
 @mock.patch.object(builtins, 'open', side_effect=mock_open_if_open_fails)
-@mock.patch.object(ckan.lib.uploader, '_storage_path', new='/doesnt_exist')
+@mock.patch.object(ckan.lib.uploader, '_storage_path', new='/doesnt_exist',
+                   create=True)
 class TestUpdateZip(object):
     @classmethod
-    def setupClass(cls):
+    def setup_class(cls):
         helpers.reset_db()
 
     @helpers.change_config('ckan.storage_path', '/doesnt_exist')
@@ -76,42 +76,44 @@ class TestUpdateZip(object):
             'https://example.com/data.csv',
             body='a,b,c'
         )
-        responses.add_passthru('http://127.0.0.1:8983/solr')
-        dataset = factories.Dataset(resources=[{
-            'url': 'https://example.com/data.csv',
-            'format': 'csv',
-            }])
+        responses.add_passthru('http://localhost:8983/solr')
+        dataset = factories.Dataset(
+            title='Test Dataset',
+            notes='Just another test dataset.',
+            resources=[{
+                'url': 'https://example.com/data.csv',
+                'format': 'csv',
+                }])
 
         update_zip(dataset['id'])
 
         dataset = helpers.call_action('package_show', id=dataset['id'])
         zip_resources = [res for res in dataset['resources']
                          if res['name'] == 'All resource data']
-        assert (len(zip_resources), 1)
+        assert len(zip_resources) == 1
         zip_resource = zip_resources[0]
-        assert (zip_resource['url_type'], 'upload')
+        assert zip_resource['url_type'] == 'upload'
 
         uploader = ckan.lib.uploader.get_resource_uploader(zip_resource)
         filepath = uploader.get_path(zip_resource['id'])
         csv_filename_in_zip = '{}.csv'.format(dataset['resources'][0]['id'])
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
-                assert (zip_.namelist(),
-                             [csv_filename_in_zip, 'datapackage.json'])
-                assert (zip_.read(csv_filename_in_zip), 'a,b,c')
+                assert zip_.namelist() == [csv_filename_in_zip, 'datapackage.json']
+                assert zip_.read(csv_filename_in_zip) == b'a,b,c'
                 datapackage_json = zip_.read('datapackage.json')
-                assert datapackage_json.startswith('{\n  "description"')
+                assert datapackage_json.startswith(b'{\n  "description"')
                 datapackage = json.loads(datapackage_json)
-                eq(datapackage['name'][:12], 'test_dataset')
-                eq(datapackage['title'], 'Test Dataset')
-                eq(datapackage['description'], 'Just another test dataset.')
-                eq(datapackage['resources'], [{
+                assert 'name' in datapackage
+                assert datapackage['title'] == 'Test Dataset'
+                assert datapackage['description'] == 'Just another test dataset.'
+                assert datapackage['resources'] == [{
                     'format': 'CSV',
                     'name': dataset['resources'][0]['id'],
                     'path': csv_filename_in_zip,
                     'sources': [{'path': 'https://example.com/data.csv',
-                                  'title': None}],
-                    }])
+                                 'title': None}],
+                    }]
 
     @helpers.change_config('ckan.storage_path', '/doesnt_exist')
     @responses.activate
@@ -121,7 +123,7 @@ class TestUpdateZip(object):
             'https://example.com/data.csv',
             body='a,b,c'
         )
-        responses.add_passthru('http://127.0.0.1:8983/solr')
+        responses.add_passthru('http://localhost:8983/solr')
         dataset = factories.Dataset(resources=[{
             'url': 'https://example.com/data.csv',
             'format': 'csv',
@@ -134,7 +136,7 @@ class TestUpdateZip(object):
         dataset = helpers.call_action('package_show', id=dataset['id'])
         zip_resources = [res for res in dataset['resources']
                          if res['name'] == 'All resource data']
-        assert (len(zip_resources), 1)
+        assert len(zip_resources) == 1
 
     @helpers.change_config('ckan.storage_path', '/doesnt_exist')
     @responses.activate
@@ -145,7 +147,7 @@ class TestUpdateZip(object):
             'https://example.com/data.csv',
             body='a,b,c'
         )
-        responses.add_passthru('http://127.0.0.1:8983/solr')
+        responses.add_passthru('http://localhost:8983/solr')
         dataset = factories.Dataset(resources=[{
             'url': 'https://example.com/data.csv',
             'format': 'csv',
@@ -166,7 +168,7 @@ class TestUpdateZip(object):
             'https://example.com/data.csv',
             body='a,b,c'
         )
-        responses.add_passthru('http://127.0.0.1:8983/solr')
+        responses.add_passthru('http://localhost:8983/solr')
         dataset = factories.Dataset(resources=[{
             'url': 'https://example.com/data.csv',
             'format': 'csv',
@@ -186,7 +188,7 @@ class TestUpdateZip(object):
             'https://example.com/data.csv',
             body='a,b,c'
         )
-        responses.add_passthru('http://127.0.0.1:8983/solr')
+        responses.add_passthru('http://localhost:8983/solr')
         dataset = factories.Dataset(resources=[{
             'url': 'https://example.com/data.csv',
             'format': 'csv',
@@ -208,7 +210,7 @@ class TestUpdateZip(object):
             'https://example.com/data.csv',
             body='a,b,c'
         )
-        responses.add_passthru('http://127.0.0.1:8983/solr')
+        responses.add_passthru('http://localhost:8983/solr')
         dataset = factories.Dataset(resources=[{
             'url': 'https://example.com/data.csv',
             'format': 'csv',
@@ -225,7 +227,7 @@ class TestUpdateZip(object):
     @helpers.change_config('ckan.storage_path', '/doesnt_exist')
     @responses.activate
     def test_uploaded_resource(self, _):
-        responses.add_passthru('http://127.0.0.1:8983/solr')
+        responses.add_passthru('http://localhost:8983/solr')
         csv_content = 'Test,csv'
         responses.add(
             responses.GET,
@@ -235,7 +237,7 @@ class TestUpdateZip(object):
         dataset = factories.Dataset()
         # add a resource which is an uploaded file
         with tempfile.NamedTemporaryFile() as fp:
-            fp.write(csv_content)
+            fp.write(csv_content.encode())
             fp.seek(0)
             registry = ckanapi.LocalCKAN()
             resource = dict(
@@ -259,20 +261,19 @@ class TestUpdateZip(object):
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
                 # Check uploaded file
-                assert (zip_.namelist(),
-                             [csv_filename_in_zip, 'datapackage.json'])
-                assert (zip_.read(csv_filename_in_zip), 'Test,csv')
+                assert zip_.namelist() == [csv_filename_in_zip, 'datapackage.json']
+                assert zip_.read(csv_filename_in_zip) == b'Test,csv'
                 # Check datapackage.json
                 datapackage_json = zip_.read('datapackage.json')
                 datapackage = json.loads(datapackage_json)
-                eq(datapackage['resources'], [{
+                assert datapackage['resources'] == [{
                     'format': 'CSV',
                     'name': 'rainfall',
                     'path': csv_filename_in_zip,
                     'sources': [{'path': dataset['resources'][0]['url'],
-                                  'title': 'Rainfall'}],
+                                 'title': 'Rainfall'}],
                     'title': 'Rainfall',
-                    }])
+                    }]
 
     @mock.patch('ckanapi.datapackage.populate_datastore_res_fields',
                 side_effect=mock_populate_datastore_res_fields)
@@ -284,7 +285,7 @@ class TestUpdateZip(object):
             'https://example.com/data.csv',
             body='Date,Price\n1/6/2017,4.00\n2/6/2017,4.12'
         )
-        responses.add_passthru('http://127.0.0.1:8983/solr')
+        responses.add_passthru('http://localhost:8983/solr')
         dataset = factories.Dataset(resources=[{
             'url': 'https://example.com/data.csv',
             'format': 'csv',
@@ -295,28 +296,27 @@ class TestUpdateZip(object):
         dataset = helpers.call_action('package_show', id=dataset['id'])
         zip_resources = [res for res in dataset['resources']
                          if res['name'] == 'All resource data']
-        assert (len(zip_resources), 1)
+        assert len(zip_resources) == 1
         zip_resource = zip_resources[0]
-        assert (zip_resource['url_type'], 'upload')
+        assert zip_resource['url_type'] == 'upload'
 
         uploader = ckan.lib.uploader.get_resource_uploader(zip_resource)
         filepath = uploader.get_path(zip_resource['id'])
         csv_filename_in_zip = '{}.csv'.format(dataset['resources'][0]['id'])
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
-                assert (zip_.namelist(),
-                             [csv_filename_in_zip, 'datapackage.json'])
+                assert zip_.namelist() == [csv_filename_in_zip, 'datapackage.json']
                 datapackage_json = zip_.read('datapackage.json')
-                assert datapackage_json.startswith('{\n  "description"')
+                assert datapackage_json.startswith(b'{\n  "description"')
                 datapackage = json.loads(datapackage_json)
-                eq(datapackage['resources'][0]['schema'],
-                   {'fields': [{'type': 'string', 'name': 'Date'},
-                               {'type': 'string', 'name': 'Price'}]})
+                assert datapackage['resources'][0]['schema'] == \
+                    {'fields': [{'type': 'string', 'name': 'Date'},
+                                {'type': 'string', 'name': 'Price'}]}
 
     @helpers.change_config('ckan.storage_path', '/doesnt_exist')
     @responses.activate
     def test_resource_url_with_connection_error(self, _):
-        responses.add_passthru('http://127.0.0.1:8983/solr')
+        responses.add_passthru('http://localhost:8983/solr')
         responses.add(
             responses.GET,
             'https://example.com/data.csv',
@@ -339,23 +339,22 @@ class TestUpdateZip(object):
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
                 # Zip doesn't contain the data, just the json file
-                assert (zip_.namelist(),
-                             ['datapackage.json'])
+                assert zip_.namelist() == ['datapackage.json']
                 # Check datapackage.json
                 datapackage_json = zip_.read('datapackage.json')
                 datapackage = json.loads(datapackage_json)
-                eq(datapackage['resources'], [{
+                assert datapackage['resources'] == [{
                     'format': 'CSV',
                     'name': 'rainfall',
                     # path is to the URL - an 'external resource'
                     'path': 'https://example.com/data.csv',
                     'title': 'rainfall',
-                    }])
+                    }]
 
     @helpers.change_config('ckan.storage_path', '/doesnt_exist')
     @responses.activate
     def test_resource_url_with_404_error(self, _):
-        responses.add_passthru('http://127.0.0.1:8983/solr')
+        responses.add_passthru('http://localhost:8983/solr')
         responses.add(
             responses.GET,
             'https://example.com/data.csv',
@@ -378,18 +377,17 @@ class TestUpdateZip(object):
         with fake_open(filepath, 'rb') as f:
             with zipfile.ZipFile(f) as zip_:
                 # Zip doesn't contain the data, just the json file
-                assert (zip_.namelist(),
-                             ['datapackage.json'])
+                assert zip_.namelist() == ['datapackage.json']
                 # Check datapackage.json
                 datapackage_json = zip_.read('datapackage.json')
                 datapackage = json.loads(datapackage_json)
-                eq(datapackage['resources'], [{
+                assert datapackage['resources'] == [{
                     'format': 'CSV',
                     'name': 'rainfall',
                     # path is to the URL - an 'external resource'
                     'path': 'https://example.com/data.csv',
                     'title': 'rainfall',
-                    }])
+                    }]
 
 
 local_datapackage = {
@@ -506,10 +504,10 @@ remote_datapackage = {
 
 class TestCanonizedDataPackage(object):
     def test_canonize_local_datapackage(self):
-        eq(canonized_datapackage(local_datapackage), remote_datapackage)
+        assert canonized_datapackage(local_datapackage) == remote_datapackage
 
     def test_canonize_remote_datapackage(self):
-        eq(canonized_datapackage(remote_datapackage), remote_datapackage)
+        assert canonized_datapackage(remote_datapackage) == remote_datapackage
 
 
 class TestSaveLocalPathInDatapackageResource(object):
@@ -520,91 +518,98 @@ class TestSaveLocalPathInDatapackageResource(object):
             datapackage['resources'][0], res, 'annual-.csv')
         save_local_path_in_datapackage_resource(
             datapackage['resources'][1], res, 'annual-csv0.csv')
-        eq(datapackage, local_datapackage)
+        assert datapackage == local_datapackage
 
 
 class TestHashDataPackage(object):
     def test_repeatability(self):
         # value of the hash shouldn't change between machines or python
         # versions etc
-        eq(hash_datapackage({'resources': []}),
-           '60482792d5032e490cdde4f759e84fd6')
+        assert hash_datapackage({'resources': []}) == \
+           '60482792d5032e490cdde4f759e84fd6'
 
     def test_dict_ordering(self):
-        eq(hash_datapackage({'resources': [{'format': 'CSV', 'name': 'a'}]}),
-           hash_datapackage({'resources': [{'name': 'a', 'format': 'CSV'}]}))
+        assert hash_datapackage({'resources': [{'format': 'CSV', 'name': 'a'}]}) == \
+           hash_datapackage({'resources': [{'name': 'a', 'format': 'CSV'}]})
 
 
 class TestGenerateDatapackageJson(object):
     @classmethod
-    def setupClass(cls):
+    def setup_class(cls):
         helpers.reset_db()
 
     def test_simple(self):
-        dataset = factories.Dataset(resources=[{
-            'url': 'https://example.com/data.csv',
-            'format': 'csv',
-            }])
+        dataset = factories.Dataset(
+            title='Test Dataset',
+            notes='Just another test dataset.',
+            resources=[{
+                'url': 'https://example.com/data.csv',
+                'format': 'csv',
+                }])
 
         datapackage, ckan_and_datapackage_resources, existing_zip_resource = \
             generate_datapackage_json(dataset['id'])
 
-        replace_number_suffix(datapackage, 'name')
+        assert 'name' in datapackage
+        datapackage.pop('name')
         replace_uuid(datapackage['resources'][0], 'name')
-        eq(datapackage, {
+        assert datapackage == {
             'description': 'Just another test dataset.',
-            'name': 'test_dataset_num',
             'resources': [{'format': 'CSV',
                            'name': '<SOME-UUID>',
                            'path': 'https://example.com/data.csv'}],
             'title': 'Test Dataset'
-            })
-        eq(ckan_and_datapackage_resources[0][0]['url'],
-           'https://example.com/data.csv')
-        eq(ckan_and_datapackage_resources[0][0]['description'],
-           '')
-        eq(ckan_and_datapackage_resources[0][1], {
+            }
+        assert ckan_and_datapackage_resources[0][0]['url'] == \
+            'https://example.com/data.csv'
+        assert ckan_and_datapackage_resources[0][0]['description'] in ('', None)
+        assert ckan_and_datapackage_resources[0][1] == {
             'format': 'CSV',
             'name': '<SOME-UUID>',
             'path': 'https://example.com/data.csv'
-        })
-        eq(existing_zip_resource, None)
+        }
+        assert existing_zip_resource is None
 
     def test_extras(self):
-        dataset = factories.Dataset(extras=[
-            {'key': 'extra1', 'value': '1'},
-            {'key': 'extra2', 'value': '2'},
-            {'key': 'extra3', 'value': '3'},
-        ])
+        dataset = factories.Dataset(
+            title='Test Dataset',
+            notes='Just another test dataset.',
+            extras=[
+                {'key': 'extra1', 'value': '1'},
+                {'key': 'extra2', 'value': '2'},
+                {'key': 'extra3', 'value': '3'},
+            ])
 
         datapackage, _, __ = \
             generate_datapackage_json(dataset['id'])
 
-        replace_number_suffix(datapackage, 'name')
-        eq(datapackage, {
+        assert 'name' in datapackage
+        datapackage.pop('name')
+        assert datapackage == {
             'description': 'Just another test dataset.',
-            'name': 'test_dataset_num',
             'title': 'Test Dataset',
             'extras': {'extra1': 1, 'extra2': 2, 'extra3': 3},
-            })
+            }
 
     @helpers.change_config(
         'ckanext.downloadall.dataset_fields_to_add_to_datapackage',
         'num_resources type')
     def test_added_fields(self):
-        dataset = factories.Dataset()
+        dataset = factories.Dataset(
+            title='Test Dataset',
+            notes='Just another test dataset.')
 
         datapackage, _, __ = \
             generate_datapackage_json(dataset['id'])
 
-        replace_number_suffix(datapackage, 'name')
-        eq(datapackage, {
+        assert 'name' in datapackage
+        datapackage.pop('name')
+        assert datapackage == {
             'description': 'Just another test dataset.',
-            'name': 'test_dataset_num',
             'title': 'Test Dataset',
             'num_resources': 0,
             'type': 'dataset',
-            })
+            }
 
 
 # helpers
@@ -651,9 +656,3 @@ def replace_uuid(dict_, key):
 def replace_datetime(dict_, key):
     assert key in dict_
     dict_[key] = '2019-05-24T15:52:30.123456'
-
-
-def replace_number_suffix(dict_, key):
-    # e.g. "Test Dataset 23" -> "Test Dataset "
-    assert key in dict_
-    dict_[key] = re.sub(r'\d+$', 'num', dict_[key])

@@ -155,6 +155,6 @@ def enqueue_update_zip(dataset_name, dataset_id, operation):
 
     toolkit.enqueue_job(
         update_zip, [dataset_id],
-        title='DownloadAll {} "{}" {}'.format(operation, dataset_name,
-                                               dataset_id),
+        title='DownloadAll {} "{}" {}'.format(
+            operation, dataset_name, dataset_id),
         queue=queue)

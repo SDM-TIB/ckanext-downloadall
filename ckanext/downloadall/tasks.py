@@ -163,8 +163,9 @@ def generate_datapackage_json(package_id):
 
     # populate datapackage with the schema from the Datastore data
     # dictionary
-    ckan_and_datapackage_resources = list(zip(resources_to_include,
-                                         datapackage.get('resources', [])))
+    ckan_and_datapackage_resources = list(zip(
+        resources_to_include,
+        datapackage.get('resources', [])))
     for res, datapackage_res in ckan_and_datapackage_resources:
         ckanapi.datapackage.populate_datastore_res_fields(
             ckan=local_ckan, res=res)
