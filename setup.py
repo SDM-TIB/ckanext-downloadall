@@ -58,6 +58,7 @@ setup(
 
     install_requires=[
         'ckanapi>=4.3',
+        'zipstream-ng>=1.8'
     ],
 
     # If there are data files included in your packages that need to be

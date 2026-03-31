@@ -6,6 +6,7 @@ from ckan import model
 from ckan.lib.jobs import DEFAULT_QUEUE_NAME
 
 from . import tasks
+from . import streaming
 
 
 def get_commands():
@@ -26,7 +27,25 @@ def cli():
 def update_zip(dataset_ref, synchronous):
     """ update-zip <package-name>
 
-    Generates zip file for a dataset, downloading its resources."""
+    Generates zip file for a dataset, downloading its resources.
+    Datasets above the stream threshold are skipped (they are streamed on
+    demand instead).
+    """
+    context = {'model': model, 'session': model.Session, 'ignore_auth': True}
+    try:
+        pkg_dict = toolkit.get_action('package_show')(
+            context, {'id': dataset_ref})
+    except toolkit.ObjectNotFound:
+        raise click.ClickException(
+            'Dataset not found: {}'.format(dataset_ref))
+
+    if streaming.should_stream(pkg_dict):
+        click.secho(
+            'Skipped (above stream threshold – will be streamed on demand): '
+            '{}'.format(dataset_ref),
+            fg='yellow')
+        return
+
     if synchronous:
         tasks.update_zip(dataset_ref)
     else:
@@ -45,17 +64,41 @@ def update_zip(dataset_ref, synchronous):
               help='Do it in the same process (not the worker)',
               is_flag=True)
 def update_all_zips(synchronous):
-    """ update-all-zips <package-name>
+    """ update-all-zips
 
-    Generates zip file for all datasets. It is done synchronously."""
-    context = {'model': model, 'session': model.Session}
+    Generates zip file for all datasets that are below the stream threshold.
+    Datasets at or above the threshold are skipped – their ZIPs are generated
+    on demand at download time.
+    """
+    context = {'model': model, 'session': model.Session, 'ignore_auth': True}
     datasets = toolkit.get_action('package_list')(context, {})
+
+    skipped = 0
+    processed = 0
+
     for i, dataset_name in enumerate(datasets):
+        try:
+            pkg_dict = toolkit.get_action('package_show')(
+                context, {'id': dataset_name})
+        except toolkit.ObjectNotFound:
+            click.echo('Dataset not found, skipping: {}'.format(dataset_name))
+            continue
+
+        if streaming.should_stream(pkg_dict):
+            click.echo(
+                'Skipping {}/{} {} (above stream threshold)'.format(
+                    i + 1, len(datasets), dataset_name))
+            skipped += 1
+            continue
+
+        processed += 1
         if synchronous:
-            print(('Processing dataset {}/{}'.format(i + 1, len(datasets))))
+            click.echo(
+                'Processing {}/{} {}'.format(i + 1, len(datasets), dataset_name))
             tasks.update_zip(dataset_name)
         else:
-            print(('Queuing dataset {}/{}'.format(i + 1, len(datasets))))
+            click.echo(
+                'Queuing {}/{} {}'.format(i + 1, len(datasets), dataset_name))
             toolkit.enqueue_job(
                 tasks.update_zip, [dataset_name],
                 title='DownloadAll {operation} "{name}" {id}'.format(
@@ -63,4 +106,7 @@ def update_all_zips(synchronous):
                     id=dataset_name),
                 queue=DEFAULT_QUEUE_NAME)
 
-    click.secho('update-all-zips: SUCCESS', fg='green', bold=True)
+    click.secho(
+        'update-all-zips: SUCCESS  (processed: {}, skipped as streamable: {})'
+        .format(processed, skipped),
+        fg='green', bold=True)

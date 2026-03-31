@@ -55,11 +55,21 @@ Technical notes
 If the resource is pushed/xloaded to DataStore then the schema (column types)
 is also included in the datapackage.json file.
 
-This extension uses a CKAN background job to create the zip every time a
-dataset is created or updated (or its data dictionary is changed). This suits
-CKANs where all files are uploaded - if the underlying data file changes
-without the CKAN URL changing, then the zip will not include the update (until
-something else triggers the zip to update).
+This extension uses a hybrid approach for zip generation:
+
+* **Small datasets** (total resource size below the configured threshold) use a
+  background job to pre-generate the zip every time the dataset is created or
+  updated (or its data dictionary is changed). The resulting zip is stored in
+  the CKAN filestore and served directly on demand. This suits CKANs where all
+  files are uploaded - if the underlying data file changes without the CKAN URL
+  changing, then the zip will not include the update (until something else
+  triggers the zip to update).
+
+* **Large datasets** (total resource size at or above the configured threshold)
+  are never pre-generated. Instead, the zip is assembled on the fly and streamed
+  directly to the browser when the user clicks "Download all", without consuming
+  any additional disk space. The threshold is configurable - see
+  ``ckanext.downloadall.stream_threshold_bytes`` in the Config Settings section.
 
 (This extension is inspired by `ckanext-packagezip
 <https://github.com/datagovuk/ckanext-packagezip>`_, but that is old and relied
@@ -123,6 +133,13 @@ Config Settings
 ---------------
 
 ::
+
+    # Total resource size in bytes at or above which a dataset's "Download all"
+    # zip is streamed on demand instead of being pre-generated and stored in the
+    # filestore. Set to 0 to stream all datasets. Set to a very large value to
+    # effectively disable streaming and pre-generate everything.
+    # (optional, default: 104857600 = 100 MB).
+    ckanext.downloadall.stream_threshold_bytes = 104857600
 
     # Include additional fields from the dataset in the datapackage.json (e.g.
     # those defined in a ckanext-scheming schema)
