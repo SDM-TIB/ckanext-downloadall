@@ -7,7 +7,7 @@ from ckan import plugins as p
 
 class TestNotify(object):
     @classmethod
-    def setupClass(cls):
+    def setup_class(cls):
         p.load('downloadall')
         helpers.reset_db()
 
@@ -21,10 +21,9 @@ class TestNotify(object):
     def test_new_resource_leads_to_queued_task(self):
         dataset = factories.Dataset(resources=[
             {'url': 'http://some.image.png', 'format': 'png'}])
-        assert (
-            [job['title'] for job in helpers.call_action('job_list')],
+        assert [job['title'] for job in helpers.call_action('job_list')] == \
             ['DownloadAll new "{}" {}'
-             .format(dataset['name'], dataset['id'])])
+             .format(dataset['name'], dataset['id'])]
 
     def test_changed_resource_leads_to_queued_task(self):
         dataset = factories.Dataset(resources=[
@@ -34,10 +33,9 @@ class TestNotify(object):
         dataset['resources'][0]['url'] = 'http://another.image.png'
         helpers.call_action('package_update', **dataset)
 
-        assert (
-            [job['title'] for job in helpers.call_action('job_list')],
+        assert [job['title'] for job in helpers.call_action('job_list')] == \
             ['DownloadAll changed "{}" {}'
-             .format(dataset['name'], dataset['id'])])
+             .format(dataset['name'], dataset['id'])]
 
     def test_deleted_resource_leads_to_queued_task(self):
         dataset = factories.Dataset(resources=[
@@ -47,10 +45,9 @@ class TestNotify(object):
         dataset['resources'] = []
         helpers.call_action('package_update', **dataset)
 
-        assert (
-            [job['title'] for job in helpers.call_action('job_list')],
+        assert [job['title'] for job in helpers.call_action('job_list')] == \
             ['DownloadAll changed "{}" {}'
-             .format(dataset['name'], dataset['id'])])
+             .format(dataset['name'], dataset['id'])]
 
     def test_created_dataset_leads_to_queued_task(self):
         dataset = {'name': 'testdataset_da',
@@ -62,10 +59,9 @@ class TestNotify(object):
         dataset = helpers.call_action('package_create', **dataset)
         # this should prompt datapackage.json to be updated
 
-        assert (
-            [job['title'] for job in helpers.call_action('job_list')],
+        assert [job['title'] for job in helpers.call_action('job_list')] == \
             ['DownloadAll new "{}" {}'
-             .format(dataset['name'], dataset['id'])])
+             .format(dataset['name'], dataset['id'])]
 
     def test_changed_dataset_leads_to_queued_task(self):
         dataset = factories.Dataset(resources=[
@@ -76,10 +72,9 @@ class TestNotify(object):
         helpers.call_action('package_update', **dataset)
         # this should prompt datapackage.json to be updated
 
-        assert (
-            [job['title'] for job in helpers.call_action('job_list')],
+        assert [job['title'] for job in helpers.call_action('job_list')] == \
             ['DownloadAll changed "{}" {}'
-             .format(dataset['name'], dataset['id'])])
+             .format(dataset['name'], dataset['id'])]
 
     def test_creation_of_zip_resource_leads_to_queued_task(self):
         # but we don't get an infinite loop because it is stopped by the
@@ -95,20 +90,16 @@ class TestNotify(object):
         }
         helpers.call_action('resource_create', **resource)
 
-        assert (
-            [job['title'] for job in helpers.call_action('job_list')],
+        assert [job['title'] for job in helpers.call_action('job_list')] == \
             ['DownloadAll changed "{}" {}'
-             .format(dataset['name'], dataset['id'])])
+             .format(dataset['name'], dataset['id'])]
 
     def test_other_instance_types_do_nothing(self):
         factories.User()
         factories.Organization()
         factories.Group()
-        assert (
-            [job['title'] for job in helpers.call_action('job_list')],
-            [])
-
-        assert (list(helpers.call_action('job_list')), [])
+        assert [job['title'] for job in helpers.call_action('job_list')] == []
+        assert list(helpers.call_action('job_list')) == []
 
     # An end-to-end test is too tricky to write - creating a dataset and seeing
     # the zip file created requires the queue worker to run, but that rips down

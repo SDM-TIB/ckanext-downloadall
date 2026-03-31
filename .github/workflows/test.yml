@@ -1,0 +1,188 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Check for syntax errors and undefined names
+        run: |
+          flake8 . --count --select=E901,E999,F821,F822,F823 \
+            --show-source --statistics --exclude ckan
+
+      - name: Full lint check
+        run: |
+          flake8 . --count --max-complexity=10 --max-line-length=127 \
+            --statistics --exclude ckan
+
+  test:
+    runs-on: ${{ matrix.os }}
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ckan-version: '2.9'
+            python-version: '3.8'
+            solr-image: 'ckan/ckan-solr:2.9-solr8'
+            os: 'ubuntu-24.04'
+            setuptools-constraint: '<46'
+            pip-flags: '--no-build-isolation'
+          - ckan-version: '2.9'
+            python-version: '3.9'
+            solr-image: 'ckan/ckan-solr:2.9-solr8'
+            os: 'ubuntu-24.04'
+            setuptools-constraint: '<46'
+            pip-flags: '--no-build-isolation'
+          - ckan-version: '2.10'
+            python-version: '3.9'
+            solr-image: 'ckan/ckan-solr:2.10-solr9'
+            os: 'ubuntu-24.04'
+            setuptools-constraint: ''
+            pip-flags: ''
+          - ckan-version: '2.10'
+            python-version: '3.10'
+            solr-image: 'ckan/ckan-solr:2.10-solr9'
+            os: 'ubuntu-24.04'
+            setuptools-constraint: ''
+            pip-flags: ''
+          - ckan-version: '2.10'
+            python-version: '3.11'
+            solr-image: 'ckan/ckan-solr:2.10-solr9'
+            os: 'ubuntu-24.04'
+            setuptools-constraint: ''
+            pip-flags: ''
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: pass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:6
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Solr is started as a step rather than a service so that the image name
+      # can reference a matrix variable (GitHub Actions services do not support
+      # matrix expressions in image names).
+      - name: Start Solr (${{ matrix.solr-image }})
+        run: |
+          docker run -d --name solr -p 8983:8983 ${{ matrix.solr-image }}
+          echo "Waiting for Solr..."
+          until curl -sf "http://localhost:8983/solr/ckan/admin/ping" > /dev/null; do
+            sleep 5
+          done
+          echo "Solr is ready."
+
+      - name: Create PostgreSQL users and databases
+        run: |
+          PGPASSWORD=pass psql -h localhost -U postgres \
+            -c "CREATE USER ckan_default WITH PASSWORD 'pass';"
+          PGPASSWORD=pass psql -h localhost -U postgres \
+            -c "CREATE USER datastore_default WITH PASSWORD 'pass';"
+          PGPASSWORD=pass psql -h localhost -U postgres \
+            -c "CREATE DATABASE ckan_test WITH OWNER ckan_default;"
+          PGPASSWORD=pass psql -h localhost -U postgres \
+            -c "CREATE DATABASE datastore_test WITH OWNER ckan_default;"
+
+      # Clone CKAN into the parent directory so that test.ini's relative path
+      # "use = config:../ckan/test-core.ini" resolves correctly without having
+      # to move test.ini into a subdirectory.
+      - name: Install CKAN ${{ matrix.ckan-version }}
+        run: |
+          cd ..
+          git clone https://github.com/ckan/ckan
+          cd ckan
+          CKAN_TAG=$(git tag | grep "^ckan-${{ matrix.ckan-version }}" \
+            | sort --version-sort | tail -n 1)
+          git checkout "$CKAN_TAG"
+          echo "Checked out $CKAN_TAG"
+          # setuptools must be present before the editable install because
+          # CKAN 2.9's setup.py imports pkg_resources at the top level, and
+          # newer pip versions do not include setuptools in their build
+          # isolation sandbox. The constraint pins setuptools < 58 for CKAN 2.9
+          # to satisfy zope.interface's use of the removed Feature class.
+          pip install "setuptools${{ matrix.setuptools-constraint }}" wheel
+          # pip-flags is --no-build-isolation for CKAN 2.9 (to use the pinned
+          # setuptools above) and empty for CKAN 2.10 (where build isolation
+          # is safe and required to correctly resolve packages like pysolr).
+          pip install ${{ matrix.pip-flags }} .
+          pip install ${{ matrix.pip-flags }} -r requirements.txt
+          pip install -r dev-requirements.txt
+
+      - name: Patch CKAN test-core.ini
+        run: |
+          # Point Solr at the named core exposed by the ckan/ckan-solr images.
+          sed -i \
+            's|solr_url.*|solr_url = http://localhost:8983/solr/ckan|' \
+            ../ckan/test-core.ini
+
+      - name: Initialise CKAN database
+        run: |
+          cd ../ckan
+          ckan -c test-core.ini db init
+          ckan -c test-core.ini datastore set-permissions \
+            | PGPASSWORD=pass psql -h localhost -U postgres
+
+      - name: Install ckanext-downloadall
+        run: |
+          pip install -e .
+          pip install -r requirements.txt
+          pip install -r dev-requirements.txt
+
+      - name: Run tests
+        run: |
+          pytest --cov=ckanext.downloadall \
+                 --cov-report=term-missing \
+                 ckanext/downloadall/tests/
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: ckan-${{ matrix.ckan-version }}
+          parallel: true
+
+  coveralls-finish:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Finalise parallel Coveralls upload
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true

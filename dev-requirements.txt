@@ -1,2 +1,7 @@
-responses==0.10.6
+pytest-ckan
+pytest-cov
+responses
+mock
+pyfakefs
 flake8
+coveralls

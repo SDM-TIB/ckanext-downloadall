@@ -6,7 +6,7 @@ from ckan import plugins as p
 
 class TestDatastoreCreate(object):
     @classmethod
-    def setupClass(cls):
+    def setup_class(cls):
         p.load('downloadall')
         p.load('datastore')
         helpers.reset_db()
@@ -29,7 +29,6 @@ class TestDatastoreCreate(object):
                             force=True)
 
         # Check the chained action caused the zip to be queued for update
-        assert (
-            [job['title'] for job in helpers.call_action('job_list')],
+        assert [job['title'] for job in helpers.call_action('job_list')] == \
             ['DownloadAll datastore_create "{}" {}'
-             .format(dataset['name'], dataset['id'])])
+             .format(dataset['name'], dataset['id'])]
