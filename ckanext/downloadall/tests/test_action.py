@@ -11,7 +11,7 @@ class TestDatastoreCreate(object):
         p.load('datastore')
         helpers.reset_db()
 
-    def setup(self):
+    def setup_method(self):
         helpers.call_action('job_clear')
 
     @classmethod
