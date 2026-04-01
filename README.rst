@@ -2,8 +2,9 @@
    these badges work. The necessary Travis and Coverage config files have been
    generated for you.
 
-.. image:: https://travis-ci.org/davidread/ckanext-downloadall.svg?branch=master
-    :target: https://travis-ci.org/davidread/ckanext-downloadall
+.. image:: https://github.com/SDM-TIB/ckanext-downloadall/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/SDM-TIB/ckanext-downloadall/actions/workflows/test.yml
+    :alt: Tests
 
 .. image:: https://img.shields.io/pypi/v/ckanext-downloadall.svg
     :target: https://pypi.python.org/project/ckanext-downloadall/
