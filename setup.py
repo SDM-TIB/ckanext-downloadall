@@ -56,7 +56,6 @@ setup(
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    namespace_packages=['ckanext'],
 
     install_requires=[
         'ckanapi>=4.3',
@@ -79,17 +78,13 @@ setup(
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # pip to create the appropriate form of executable for the target platform.
-    entry_points={
-        'ckan.plugins': [
-            'downloadall=ckanext.downloadall.plugin:DownloadallPlugin',
-        ],
-        'babel.extractors': [
-            'ckan = ckan.lib.extract:extract_ckan',
-        ],
-        'console_scripts': [
-            'downloadall = ckanext.downloadall.cli:cli',
-        ],
-    },
+    entry_points='''
+        [ckan.plugins]
+        downloadall=ckanext.downloadall.plugin:DownloadallPlugin
+
+        [babel.extractors]
+        ckan=ckan.lib.extract:extract_ckan
+    ''',
 
     # If you are changing from the default layout of your extension, you may
     # have to change the message extractors, you can read more about babel
