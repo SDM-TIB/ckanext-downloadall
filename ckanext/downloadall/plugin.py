@@ -153,8 +153,10 @@ def enqueue_update_zip(dataset_name, dataset_id, operation):
     log.debug('Queuing job update_zip: {} {}'
               .format(operation, dataset_name))
 
+    # TODO: Make the timeout configurable
     toolkit.enqueue_job(
         update_zip, [dataset_id],
         title='DownloadAll {} "{}" {}'.format(
             operation, dataset_name, dataset_id),
-        queue=queue)
+        queue=queue,
+        rq_kwargs={"timeout": 1800})
