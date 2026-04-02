@@ -201,8 +201,7 @@ def write_zip(fp, datapackage, ckan_and_datapackage_resources):
             # ckanapi.datapackage.resource_filename() requires 'format' to be
             # present; default to empty string when the resource has none.
             dres.setdefault('format', '')
-            filename = \
-                ckanapi.datapackage.resource_filename(dres)
+            filename = ckanapi.datapackage.resource_filename(dres)
             try:
                 download_resource_into_zip(res['url'], filename, zipf)
             except DownloadError:
