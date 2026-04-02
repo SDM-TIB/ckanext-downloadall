@@ -6,6 +6,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- Configurable hybrid zip approach: small datasets (below `ckanext.downloadall.stream_threshold_bytes`) are pre-generated and stored in the filestore; large datasets are assembled and streamed on the fly to the browser without consuming extra disk space.
+- New config option `ckanext.downloadall.max_resource_size`: maximum size in bytes for individual resources to be included in the zip; resources exceeding the limit are excluded and marked as external in `datapackage.json`.
+- New config option `ckanext.downloadall.include_external_resources`: controls whether externally-linked resources (non-upload `url_type`) are included in the zip (default: `true`).
+- `--force` flag added to the CLI `update-zip` and `update-all-zips` commands to bypass the skip-if-no-changes check.
+- `metadata_modified` timestamp is now preserved on the dataset after the zip resource is created or updated, avoiding spurious re-triggers of zip regeneration.
+
+### Changed
+- Resources that are stored locally in the CKAN filestore are now read directly from disk instead of being re-downloaded over HTTP, significantly improving performance and reducing network overhead.
+- Background job queue timeout increased to 30 minutes to accommodate large datasets.
+- `requests.get()` now uses an explicit 60-second timeout to prevent hung downloads.
+- Dropped support for Python 3.7; minimum supported version is now Python 3.8.
+- Dropped support for CKAN 2.8 and earlier; minimum supported version is now CKAN 2.9.
+
+### Fixed
+- Fixed `NotAuthorized` error occurring in background jobs when the site user context was not set up correctly.
+- Fixed race condition when a zip update job is enqueued before the dataset is fully committed to the database on package create; the job now waits and retries gracefully.
+- Fixed ZIP file not being written correctly in certain code paths.
+- Fixed CLI command failures caused by incorrect argument handling.
+- Fixed crash when a dataset has no resources.
+- Fixed crash when a resource has no `format` field set.
+
 ## [0.1.0] - 2019-11-12
 
 ### Added
