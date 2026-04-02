@@ -8,22 +8,49 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ckanext-downloadall 0.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-11-27 09:54+0000\n"
+"POT-Creation-Date: 2026-04-02 15:30+0200\n"
 "PO-Revision-Date: 2019-11-27 09:54+0000\n"
 "Last-Translator: m431m\n"
 "Language: fr\n"
 "Language-Team: fr <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.3.4\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ckanext/downloadall/streaming.py:85
+msgid "Dataset not found"
+msgstr "Jeu de données introuvable"
+
+#: ckanext/downloadall/streaming.py:87
+msgid "Not authorised to read this dataset"
+msgstr "Vous n'êtes pas autorisé(e) à consulter ce jeu de données"
+
+#: ckanext/downloadall/streaming.py:100
+msgid ""
+"The zip file for this dataset has not been generated yet. Please try "
+"again later."
+msgstr ""
+"Le fichier zip pour ce jeu de données n'a pas encore été généré. Veuillez"
+" réessayer ultérieurement."
+
+#: ckanext/downloadall/streaming.py:142
+msgid "Could not build ZIP manifest."
+msgstr "Impossible de construire le manifeste ZIP."
 
 #: ckanext/downloadall/templates/package/read.html:12
-msgid "This download is not currently available"
-msgstr "Le téléchargement n'est pas disponible actuellement"
+msgid ""
+"This archive is generated on the fly and may take a moment to start "
+"downloading."
+msgstr ""
+"Cette archive est générée à la volée et le téléchargement peut prendre un"
+" moment avant de démarrer."
 
 #: ckanext/downloadall/templates/package/read.html:14
 msgid "Download all"
 msgstr "Tout télécharger"
+
+#~ msgid "This download is not currently available"
+#~ msgstr "Le téléchargement n'est pas disponible actuellement"
 
