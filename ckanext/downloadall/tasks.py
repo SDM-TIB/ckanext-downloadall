@@ -292,17 +292,17 @@ def remove_resources_that_should_not_be_included_in_the_datapackage(dataset):
 
     existing_zip_resource = None
     resources_to_include = []
-    for i, res in enumerate(dataset['resources']):
+    for i, res in enumerate(dataset.get('resources', [])):
         if res.get('downloadall_metadata_modified'):
             # this is an existing zip of all the other resources
             log.debug('Resource resource {}/{} skipped - is the zip itself'
-                      .format(i + 1, len(dataset['resources'])))
+                      .format(i + 1, len(dataset.get('resources', []))))
             existing_zip_resource = res
             continue
 
         if res.get('format', '') in resource_formats_to_ignore:
             log.debug('Resource resource {}/{} skipped - because it is '
-                      'format {}'.format(i + 1, len(dataset['resources']),
+                      'format {}'.format(i + 1, len(dataset.get('resources', [])),
                                          res.get('format', '')))
             continue
         resources_to_include.append(res)
