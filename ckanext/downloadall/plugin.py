@@ -95,7 +95,7 @@ class DownloadallPlugin(plugins.SingletonPlugin, DefaultTranslation):
 
     def before_index(self, pkg_dict):
         try:
-            if 'All resource data' in pkg_dict['res_name']:
+            if 'All resource data' in pkg_dict.get('res_name', ''):
                 # we've got a 'Download all zip', so remove it's ZIP from the
                 # SOLR facet of resource formats, as it's not really a data
                 # resource

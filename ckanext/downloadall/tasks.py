@@ -301,10 +301,10 @@ def remove_resources_that_should_not_be_included_in_the_datapackage(dataset):
             existing_zip_resource = res
             continue
 
-        if res['format'] in resource_formats_to_ignore:
+        if res.get('format', '') in resource_formats_to_ignore:
             log.debug('Resource resource {}/{} skipped - because it is '
                       'format {}'.format(i + 1, len(dataset['resources']),
-                                         res['format']))
+                                         res.get('format', '')))
             continue
         resources_to_include.append(res)
     dataset = dict(dataset, resources=resources_to_include)
