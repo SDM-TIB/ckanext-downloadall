@@ -12,7 +12,9 @@ extract:
 	python3 setup.py extract_messages
 
 update:
+	python3 setup.py update_catalog --locale de
 	python3 setup.py update_catalog --locale fr
 
 compile:
+	python3 setup.py compile_catalog --locale de
 	python3 setup.py compile_catalog --locale fr

@@ -1,0 +1,53 @@
+# German translations for ckanext-downloadall.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the ckanext-downloadall
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-downloadall 2.0.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-04-02 15:30+0200\n"
+"PO-Revision-Date: 2026-04-02 16:00+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ckanext/downloadall/streaming.py:85
+msgid "Dataset not found"
+msgstr "Datensatz nicht gefunden"
+
+#: ckanext/downloadall/streaming.py:87
+msgid "Not authorised to read this dataset"
+msgstr "Sie sind nicht berechtigt, diesen Datensatz einzusehen"
+
+#: ckanext/downloadall/streaming.py:100
+msgid ""
+"The zip file for this dataset has not been generated yet. Please try "
+"again later."
+msgstr ""
+"Die ZIP-Datei für diesen Datensatz wurde noch nicht erstellt. Bitte "
+"versuchen Sie es später erneut."
+
+#: ckanext/downloadall/streaming.py:142
+msgid "Could not build ZIP manifest."
+msgstr "Das ZIP-Manifest konnte nicht erstellt werden."
+
+#: ckanext/downloadall/templates/package/read.html:12
+msgid ""
+"This archive is generated on the fly and may take a moment to start "
+"downloading."
+msgstr ""
+"Dieses Archiv wird dynamisch erzeugt. Es kann einen Moment dauern, bis "
+"der Download beginnt."
+
+#: ckanext/downloadall/templates/package/read.html:14
+msgid "Download all"
+msgstr "Alles herunterladen"
+

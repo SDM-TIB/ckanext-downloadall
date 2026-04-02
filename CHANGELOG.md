@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New config option `ckanext.downloadall.include_external_resources`: controls whether externally-linked resources (non-upload `url_type`) are included in the zip (default: `true`).
 - `--force` flag added to the CLI `update-zip` and `update-all-zips` commands to bypass the skip-if-no-changes check.
 - `metadata_modified` timestamp is now preserved on the dataset after the zip resource is created or updated, avoiding spurious re-triggers of zip regeneration.
+- German translation
 
 ### Changed
 - Resources that are stored locally in the CKAN filestore are now read directly from disk instead of being re-downloaded over HTTP, significantly improving performance and reducing network overhead.
