@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable hybrid zip approach: small datasets (below `ckanext.downloadall.stream_threshold_bytes`) are pre-generated and stored in the filestore; large datasets are assembled and streamed on the fly to the browser without consuming extra disk space.
 - New config option `ckanext.downloadall.max_resource_size`: maximum size in bytes for individual resources to be included in the zip; resources exceeding the limit are excluded and marked as external in `datapackage.json`.
 - New config option `ckanext.downloadall.include_external_resources`: controls whether externally-linked resources (non-upload `url_type`) are included in the zip (default: `true`).
+- New config option `ckanext.downloadall.job_timeout`: background job timeout in seconds (default: `1800`). Previously this was hardcoded.
 - `--force` flag added to the CLI `update-zip` and `update-all-zips` commands to bypass the skip-if-no-changes check.
 - `metadata_modified` timestamp is now preserved on the dataset after the zip resource is created or updated, avoiding spurious re-triggers of zip regeneration.
 - German translation
 
 ### Changed
 - Resources that are stored locally in the CKAN filestore are now read directly from disk instead of being re-downloaded over HTTP, significantly improving performance and reducing network overhead.
-- Background job queue timeout increased to 30 minutes to accommodate large datasets.
 - `requests.get()` now uses an explicit 60-second timeout to prevent hung downloads.
 - Dropped support for Python 3.7; minimum supported version is now Python 3.8.
 - Dropped support for CKAN 2.8 and earlier; minimum supported version is now CKAN 2.9.

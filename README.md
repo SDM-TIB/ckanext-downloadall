@@ -114,6 +114,11 @@ ckanext.downloadall.max_resource_size = 104857600
 # When set to true, external resources are also downloaded and included.
 # (optional, default: true)
 ckanext.downloadall.include_external_resources = false
+
+# Timeout in seconds for background zip generation jobs.
+# Increase this for very large datasets that take longer to process.
+# (optional, default: 1800)
+ckanext.downloadall.job_timeout = 1800
 ```
 
 ---

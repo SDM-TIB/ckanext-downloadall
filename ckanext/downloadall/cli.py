@@ -1,12 +1,13 @@
 # encoding: utf-8
 
-import click
 import ckan.plugins.toolkit as toolkit
+import click
 from ckan import model
 from ckan.lib.jobs import DEFAULT_QUEUE_NAME
 
-from . import tasks
+from . import helpers
 from . import streaming
+from . import tasks
 
 
 def get_commands():
@@ -62,7 +63,7 @@ def update_zip(dataset_ref, synchronous, force):
                 operation='cli-requested', name=dataset_ref,
                 id=dataset_ref),
             queue=DEFAULT_QUEUE_NAME,
-            rq_kwargs={"timeout": 1800})
+            rq_kwargs={"timeout": helpers.get_job_timeout()})
     click.secho('update-zip: SUCCESS', fg='green', bold=True)
 
 
@@ -120,7 +121,7 @@ def update_all_zips(synchronous, force):
                     operation='cli-requested', name=dataset_name,
                     id=dataset_name),
                 queue=DEFAULT_QUEUE_NAME,
-                rq_kwargs={"timeout": 1800})
+                rq_kwargs={"timeout": helpers.get_job_timeout()})
 
     click.secho(
         'update-all-zips: SUCCESS  (processed: {}, skipped as streamable: {})'

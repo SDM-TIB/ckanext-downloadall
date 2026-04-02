@@ -1,3 +1,13 @@
+import ckan.plugins.toolkit as toolkit
+
+DEFAULT_JOB_TIMEOUT = 1800
+
+
+def get_job_timeout():
+    return toolkit.config.get(
+        'ckanext.downloadall.job_timeout', DEFAULT_JOB_TIMEOUT)
+
+
 def pop_zip_resource(pkg):
     '''Finds the zip resource in a package's resources, removes it from the
     package and returns it. NB the package doesn't have the zip resource in it
