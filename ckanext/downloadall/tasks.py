@@ -233,6 +233,15 @@ def generate_datapackage_json(package_id):
         ckanapi.datapackage.populate_schema_from_datastore(
             cres=res, dres=datapackage_res)
 
+        # Mark whether this resource is a CKAN upload or an external link.
+        # Uploaded resources will have their file bundled inside the ZIP
+        # (path points to the local filename); external resources keep their
+        # original URL as path.  Consumers of the datapackage can use this
+        # field to distinguish the two without having to inspect the path.
+        #   "upload"    --> file is bundled in the ZIP
+        #   "external"  --> resource is an external link (path is a URL)
+        datapackage_res['ckan_url_type'] = res.get('url_type') or 'external'
+
     # add in any other dataset fields, if configured
     fields_to_include = config.get(
         'ckanext.downloadall.dataset_fields_to_add_to_datapackage',

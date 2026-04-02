@@ -24,6 +24,15 @@ The `datapackage.json` is a [Frictionless Data](https://frictionlessdata.io/spec
 
 If the resource is pushed/xloaded to DataStore, the schema (column types) is also included in the `datapackage.json` file.
 
+Each resource entry in `datapackage.json` carries a `ckan_url_type` field that indicates whether the resource is bundled inside the ZIP or is an external link:
+
+| `ckan_url_type` | Meaning |
+|-----------------|---|
+| `"upload"`      | File is bundled inside the ZIP; `path` points to the local filename within the archive. |
+| `"external"`    | Resource is an external link; `path` is the original remote URL. |
+
+This makes it straightforward to distinguish uploaded files from linked resources when importing the datapackage into another system, without having to inspect whether `path` looks like a URL or a filename.
+
 This extension uses a hybrid approach for zip generation:
 
 - **Small datasets** (total resource size below the configured threshold) use a background job to pre-generate the zip every time the dataset is created or updated (or its data dictionary is changed). The resulting zip is stored in the CKAN filestore and served directly on demand. This suits CKANs where all files are uploaded – if the underlying data file changes without the CKAN URL changing, then the zip will not include the update (until something else triggers the zip to update).

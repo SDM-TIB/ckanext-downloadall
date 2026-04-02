@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--force` flag added to the CLI `update-zip` and `update-all-zips` commands to bypass the skip-if-no-changes check.
 - `metadata_modified` timestamp is now preserved on the dataset after the zip resource is created or updated, avoiding spurious re-triggers of zip regeneration.
 - German translation
+- Each resource in `datapackage.json` now includes a `ckan_url_type` field (`"upload"` for files bundled in the ZIP, `"external"` for external links). This allows consumers of the datapackage to reliably distinguish uploaded files from linked resources without inspecting the `path` field. Closes [#27](https://github.com/SDM-TIB/ckanext-downloadall/issues/27).
 
 ### Changed
 - Resources that are stored locally in the CKAN filestore are now read directly from disk instead of being re-downloaded over HTTP, significantly improving performance and reducing network overhead.
