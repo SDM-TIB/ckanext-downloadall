@@ -24,7 +24,10 @@ def cli():
 @click.option('--synchronous', '-s',
               help='Do it in the same process (not the worker)',
               is_flag=True)
-def update_zip(dataset_ref, synchronous):
+@click.option('--force', '-f',
+              help='Force generation of zip file',
+              is_flag=True)
+def update_zip(dataset_ref, synchronous, force):
     """ update-zip <package-name>
 
     Generates zip file for a dataset, downloading its resources.
@@ -46,11 +49,15 @@ def update_zip(dataset_ref, synchronous):
             fg='yellow')
         return
 
+    skip_if_no_changes = True
+    if force:
+        skip_if_no_changes = False
+
     if synchronous:
-        tasks.update_zip(dataset_ref)
+        tasks.update_zip(dataset_ref, skip_if_no_changes)
     else:
         toolkit.enqueue_job(
-            tasks.update_zip, [dataset_ref],
+            tasks.update_zip, [dataset_ref, skip_if_no_changes],
             title='DownloadAll {operation} "{name}" {id}'.format(
                 operation='cli-requested', name=dataset_ref,
                 id=dataset_ref),
@@ -64,7 +71,10 @@ def update_zip(dataset_ref, synchronous):
 @click.option('--synchronous', '-s',
               help='Do it in the same process (not the worker)',
               is_flag=True)
-def update_all_zips(synchronous):
+@click.option('--force', '-f',
+              help='Force generation of zip file',
+              is_flag=True)
+def update_all_zips(synchronous, force):
     """ update-all-zips
 
     Generates zip file for all datasets that are below the stream threshold.
@@ -92,16 +102,20 @@ def update_all_zips(synchronous):
             skipped += 1
             continue
 
+        skip_if_no_changes = True
+        if force:
+            skip_if_no_changes = False
+
         processed += 1
         if synchronous:
             click.echo(
                 'Processing {}/{} {}'.format(i + 1, len(datasets), dataset_name))
-            tasks.update_zip(dataset_name)
+            tasks.update_zip(dataset_name, skip_if_no_changes)
         else:
             click.echo(
                 'Queuing {}/{} {}'.format(i + 1, len(datasets), dataset_name))
             toolkit.enqueue_job(
-                tasks.update_zip, [dataset_name],
+                tasks.update_zip, [dataset_name, skip_if_no_changes],
                 title='DownloadAll {operation} "{name}" {id}'.format(
                     operation='cli-requested', name=dataset_name,
                     id=dataset_name),
