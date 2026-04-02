@@ -12,6 +12,7 @@ import six
 from ckan import model
 from ckan.lib import uploader
 from ckan.plugins.toolkit import get_action, config
+from ckan.logic import NotFound
 
 log = __import__('logging').getLogger(__name__)
 
@@ -29,7 +30,17 @@ def update_zip(package_id, skip_if_no_changes=True):
     '''
     # TODO deal with private datasets - 'ignore_auth': True
     context = {'model': model, 'session': model.Session}
-    dataset = get_action('package_show')(context, {'id': package_id})
+
+    try:
+        dataset = get_action('package_show')(context, {'id': package_id})
+    except NotFound:
+        log.warning(
+            'Package %s not found - it may have been deleted or the job '
+            'was enqueued before the dataset was committed to the database. '
+            'Skipping zip update.', package_id
+        )
+        return
+
     log.debug('Updating zip: {}'.format(dataset['name']))
 
     datapackage, ckan_and_datapackage_resources, existing_zip_resource = \
