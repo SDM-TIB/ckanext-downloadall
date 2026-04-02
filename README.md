@@ -101,6 +101,19 @@ ckanext.downloadall.stream_threshold_bytes = 104857600
 # those defined in a ckanext-scheming schema)
 # (optional, space-separated list).
 ckanext.downloadall.dataset_fields_to_add_to_datapackage = district county
+
+# Maximum size (in bytes) for individual resources to include in the zip.
+# Resources larger than this will be excluded from the zip and marked as
+# external resources in the datapackage.json
+# (optional, no limit by default).
+# Examples: 104857600 (100MB), 1073741824 (1GB)
+ckanext.downloadall.max_resource_size = 104857600
+
+# Include external resources (links) in the zip download package.
+# When set to false (default), only directly-uploaded files are included.
+# When set to true, external resources are also downloaded and included.
+# (optional, default: true)
+ckanext.downloadall.include_external_resources = false
 ```
 
 ---

@@ -260,6 +260,74 @@ def save_local_path_in_datapackage_resource(datapackage_resource, res,
     datapackage_resource['path'] = filename
 
 
+def get_resource_size(url, filepath=None):
+    """
+    Get the size of a resource in bytes.
+
+    :param url: URL of the resource
+    :param filepath: Local file path (if resource is uploaded locally)
+    :return: Size in bytes, or None if size cannot be determined
+    """
+    # Try local file first if filepath provided
+    if filepath and os.path.exists(filepath):
+        try:
+            return os.path.getsize(filepath)
+        except OSError as e:
+            log.warning('Could not get size of local file {}: {}'.format(
+                filepath, str(e)))
+            return None
+
+    # Try HEAD request for remote resource
+    try:
+        response = requests.head(url, allow_redirects=True, timeout=10)
+        response.raise_for_status()
+        content_length = response.headers.get('Content-Length')
+        if content_length:
+            return int(content_length)
+    except (requests.RequestException, ValueError) as e:
+        log.debug('Could not get size via HEAD request for {}: {}'.format(
+            url, str(e)))
+
+    return None
+
+
+def check_resource_size_limit(size, url):
+    """
+    Check if a resource size exceeds the configured maximum.
+
+    :param size: Size in bytes (or None if unknown)
+    :param url: URL of the resource (for logging)
+    :return: True if resource should be included, False if it exceeds limit
+    """
+    max_size_str = config.get('ckanext.downloadall.max_resource_size')
+
+    if not max_size_str:
+        # No limit configured
+        return True
+
+    if size is None:
+        # Cannot determine size, allow download by default
+        log.debug('Resource size unknown for {}, allowing download'.format(
+            url))
+        return True
+
+    try:
+        max_size = int(max_size_str)
+    except ValueError:
+        log.error('Invalid value for ckanext.downloadall.max_resource_size: {}'
+                  .format(max_size_str))
+        return True
+
+    if size > max_size:
+        log.warning(
+            'Resource {} size {} exceeds maximum size {}. '
+            'Resource will be skipped.'.format(
+                url, format_bytes(size), format_bytes(max_size)))
+        return False
+
+    return True
+
+
 def download_resource_into_zip(url, filename, zipf, resource_id=None, package_id=None):
     # Try to get the resource from local storage first
     if resource_id and package_id:
@@ -280,6 +348,12 @@ def download_resource_into_zip(url, filename, zipf, resource_id=None, package_id
                 filepath = upload.get_path(resource_id)
 
                 if filepath and os.path.exists(filepath):
+                    # Check file size before processing
+                    file_size = get_resource_size(url, filepath)
+                    if not check_resource_size_limit(file_size, url):
+                        raise DownloadError(
+                            'Resource exceeds maximum size limit')
+
                     log.debug('Using local file: {}'.format(filepath))
                     hash_object = hashlib.md5()
                     size = 0
@@ -302,6 +376,13 @@ def download_resource_into_zip(url, filename, zipf, resource_id=None, package_id
                 .format(resource_id, str(e)))
 
     # Fall back to HTTP download for remote resources or if local access fails
+    # Check resource size before downloading
+    resource_size = get_resource_size(url)
+    if not check_resource_size_limit(resource_size, url):
+        log.error('Resource {} exceeds maximum size limit and will not '
+                  'be downloaded'.format(url))
+        raise DownloadError('Resource exceeds maximum size limit')
+
     try:
         r = requests.get(url, stream=True, timeout=60)
         r.raise_for_status()
@@ -356,6 +437,11 @@ def format_bytes(size_bytes):
 def remove_resources_that_should_not_be_included_in_the_datapackage(dataset):
     resource_formats_to_ignore = ['API', 'api']  # TODO make it configurable
 
+    # Check if external resources should be included
+    include_external = config.get(
+        'ckanext.downloadall.include_external_resources', 'true').lower()
+    include_external_resources = include_external in ['true', '1', 'yes']
+
     existing_zip_resource = None
     resources_to_include = []
     for i, res in enumerate(dataset.get('resources', [])):
@@ -371,6 +457,17 @@ def remove_resources_that_should_not_be_included_in_the_datapackage(dataset):
                       'format {}'.format(i + 1, len(dataset.get('resources', [])),
                                          res.get('format', '')))
             continue
+
+        # Skip external resources (links) if configured to do so
+        if not include_external_resources:
+            url_type = res.get('url_type', '')
+            if url_type != 'upload':
+                log.debug('Resource {}/{} skipped - external resource (link) '
+                          'excluded from zip. URL: {}'
+                          .format(i + 1, len(dataset.get('resources', [])),
+                                  res.get('url', 'unknown')))
+                continue
+
         resources_to_include.append(res)
     dataset = dict(dataset, resources=resources_to_include)
     return dataset, resources_to_include, existing_zip_resource
