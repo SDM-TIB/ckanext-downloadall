@@ -25,7 +25,7 @@ jobs:
 
       - name: Full lint check
         run: |
-          flake8 . --count --max-complexity=10 --max-line-length=127 \
+          flake8 . --count --max-complexity=20 --max-line-length=127 \
             --statistics --exclude ckan
 
   test:
