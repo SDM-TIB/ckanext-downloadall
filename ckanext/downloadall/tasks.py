@@ -29,7 +29,13 @@ def update_zip(package_id, skip_if_no_changes=True):
         updating the zip.
     '''
     # TODO deal with private datasets - 'ignore_auth': True
-    context = {'model': model, 'session': model.Session}
+    site_user = get_action('get_site_user')({'ignore_auth': True}, {})
+    context = {
+        'model': model,
+        'session': model.Session,
+        'user': site_user['name'],
+        'ignore_auth': False,
+    }
 
     try:
         dataset = get_action('package_show')(context, {'id': package_id})
@@ -157,7 +163,13 @@ def generate_datapackage_json(package_id):
     '''Generates the datapackage - metadata that would be saved as
     datapackage.json.
     '''
-    context = {'model': model, 'session': model.Session}
+    site_user = get_action('get_site_user')({'ignore_auth': True}, {})
+    context = {
+        'model': model,
+        'session': model.Session,
+        'user': site_user['name'],
+        'ignore_auth': False,
+    }
     dataset = get_action('package_show')(
         context, {'id': package_id})
 
