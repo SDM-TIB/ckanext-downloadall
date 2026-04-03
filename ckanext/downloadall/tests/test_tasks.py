@@ -108,6 +108,7 @@ class TestUpdateZip(object):
                 assert datapackage['title'] == 'Test Dataset'
                 assert datapackage['description'] == 'Just another test dataset.'
                 assert datapackage['resources'] == [{
+                    'ckan_url_type': 'external',
                     'format': 'CSV',
                     'name': dataset['resources'][0]['id'],
                     'path': csv_filename_in_zip,
@@ -267,6 +268,7 @@ class TestUpdateZip(object):
                 datapackage_json = zip_.read('datapackage.json')
                 datapackage = json.loads(datapackage_json)
                 assert datapackage['resources'] == [{
+                    'ckan_url_type': 'upload',
                     'format': 'CSV',
                     'name': 'rainfall',
                     'path': csv_filename_in_zip,
@@ -344,6 +346,7 @@ class TestUpdateZip(object):
                 datapackage_json = zip_.read('datapackage.json')
                 datapackage = json.loads(datapackage_json)
                 assert datapackage['resources'] == [{
+                    'ckan_url_type': 'external',
                     'format': 'CSV',
                     'name': 'rainfall',
                     # path is to the URL - an 'external resource'
@@ -382,6 +385,7 @@ class TestUpdateZip(object):
                 datapackage_json = zip_.read('datapackage.json')
                 datapackage = json.loads(datapackage_json)
                 assert datapackage['resources'] == [{
+                    'ckan_url_type': 'external',
                     'format': 'CSV',
                     'name': 'rainfall',
                     # path is to the URL - an 'external resource'
@@ -555,7 +559,8 @@ class TestGenerateDatapackageJson(object):
         replace_uuid(datapackage['resources'][0], 'name')
         assert datapackage == {
             'description': 'Just another test dataset.',
-            'resources': [{'format': 'CSV',
+            'resources': [{'ckan_url_type': 'external',
+                           'format': 'CSV',
                            'name': '<SOME-UUID>',
                            'path': 'https://example.com/data.csv'}],
             'title': 'Test Dataset'
@@ -564,6 +569,7 @@ class TestGenerateDatapackageJson(object):
             'https://example.com/data.csv'
         assert ckan_and_datapackage_resources[0][0]['description'] in ('', None)
         assert ckan_and_datapackage_resources[0][1] == {
+            'ckan_url_type': 'external',
             'format': 'CSV',
             'name': '<SOME-UUID>',
             'path': 'https://example.com/data.csv'
