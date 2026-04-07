@@ -4,6 +4,7 @@ from codecs import open  # To use a consistent encoding
 from os import path
 
 here = path.abspath(path.dirname(__file__))
+version = '0.2.0'
 
 # Get the long description from the relevant file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -15,7 +16,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
-    version='2.0.0',
+    version=version,
 
     description='''CKAN extension that adds a "Download all" button to a dataset''',
     long_description=long_description,
@@ -23,10 +24,16 @@ setup(
 
     # The project's main homepage.
     url='https://github.com/davidread/ckanext-downloadall',
+    project_urls={
+        'Changes': 'https://github.com/SDM-TIB/ckanext-downloadall/blob/master/CHANGELOG.md',
+        'Source Code': 'https://github.com/SDM-TIB/ckanext-downloadall',
+        'Issue Tracker': 'https://github.com/SDM-TIB/ckanext-downloadall/issues'
+    },
+    download_url='https://github.com/SDM-TIB/ckanext-downloadall/archive/refs/tags/v' + version + '.tar.gz',
 
     # Author details
-    author='''David Read, Ian Ward''',
-    author_email='''david.read@hackneyworkshop.com''',
+    author='''David Read, Ian Ward, Philipp D. Rohde''',
+    author_email='''philipp.rohde@tib.eu''',
 
     # Choose your license
     license='AGPL',
