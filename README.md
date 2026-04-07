@@ -8,7 +8,7 @@
 
 This CKAN extension adds a "Download all" button to datasets. This downloads a zip file containing all the resource files and a `datapackage.json`.
 
-![Demo](demo.png)
+![Demo](https://raw.githubusercontent.com/SDM-TIB/ckanext-downloadall/refs/heads/master/demo.png)
 
 This zip file is a good way to package data for storing or sending, because:
 
