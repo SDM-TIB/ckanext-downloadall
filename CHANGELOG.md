@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added 
 - New config option: `ckanext.downloadall.job_queue_name`: name of the queue that background zip generation jobs are sent to (default: `"default"`)
 
+### Changed
+- Stream not-yet-generated zip files instead of throwing `404`
+
 ## [0.2.0] - 2026-04-07
 
 ### Added

@@ -94,14 +94,15 @@ def download_all(dataset_id):
     if bundle_res and bundle_res.get(u'url'):
         return toolkit.redirect_to(bundle_res[u'url'])
 
-    # Bundle not generated yet (worker hasn't run).
-    toolkit.abort(
-        404,
-        toolkit._(
-            u'The zip file for this dataset has not been generated yet. '
-            u'Please try again later.'
-        ),
+    # Bundle not generated yet (worker hasn't run) – stream on the fly so the
+    # user gets their data immediately rather than a 404.  The background job
+    # will still complete and store the pre-generated zip for future requests.
+    log.info(
+        u'downloadall: pre-generated zip not found for %s, '
+        u'falling back to on-demand streaming.',
+        dataset_id,
     )
+    return _stream_zip_response(pkg_dict)
 
 
 def _find_bundle_resource(pkg_dict):
