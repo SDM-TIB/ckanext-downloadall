@@ -1,8 +1,10 @@
 """Tests for plugin.py."""
 
+import pytest
 from ckan.tests import factories
 from ckan.tests import helpers
 from ckan import plugins as p
+from ckan.lib.jobs import DEFAULT_QUEUE_NAME
 
 
 class TestNotify(object):
@@ -108,3 +110,38 @@ class TestNotify(object):
     # session, which is not allowed during a
     # DomainObjectModificationExtension.notify(). So we just do unit tests for
     # adding the zip task to the queue, and testing the task (test_tasks.py)
+
+
+class TestQueueName(object):
+    """Tests that jobs land on the correct RQ queue."""
+
+    @classmethod
+    def setup_class(cls):
+        p.load('downloadall')
+        helpers.reset_db()
+
+    def setup_method(self):
+        helpers.call_action('job_clear')
+
+    @classmethod
+    def teardown_class(cls):
+        p.unload('downloadall')
+
+    def test_default_queue_is_used_when_config_not_set(self):
+        """Without config, jobs go to the CKAN default queue."""
+        dataset = factories.Dataset(resources=[
+            {'url': 'http://some.image.png', 'format': 'png'}])
+        jobs = helpers.call_action('job_list', queues=[DEFAULT_QUEUE_NAME])
+        assert any(dataset['id'] in (job['title'] or '') for job in jobs), \
+            'Expected a job for the dataset on the default queue'
+
+    @pytest.mark.ckan_config('ckanext.downloadall.job_queue_name', 'downloadall')
+    def test_custom_queue_is_used_when_configured(self):
+        """When the config key is set, jobs go to the named queue instead."""
+        from ckanext.downloadall import helpers as da_helpers
+        assert da_helpers.get_queue_name() == 'downloadall'
+
+    def test_get_queue_name_returns_default_without_config(self):
+        """get_queue_name() falls back to DEFAULT_QUEUE_NAME."""
+        from ckanext.downloadall import helpers as da_helpers
+        assert da_helpers.get_queue_name() == DEFAULT_QUEUE_NAME

@@ -1,6 +1,17 @@
 import ckan.plugins.toolkit as toolkit
+from ckan.lib.jobs import DEFAULT_QUEUE_NAME
 
 DEFAULT_JOB_TIMEOUT = 1800
+
+
+def get_queue_name():
+    '''Return the RQ queue name that downloadall background jobs are sent to.
+
+    Reads ``ckanext.downloadall.job_queue_name`` from the CKAN config.
+    Defaults to CKAN's built-in ``DEFAULT_QUEUE_NAME`` (``"default"``).
+    '''
+    return toolkit.config.get(
+        'ckanext.downloadall.job_queue_name', DEFAULT_QUEUE_NAME)
 
 
 def get_job_timeout():

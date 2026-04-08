@@ -128,6 +128,14 @@ ckanext.downloadall.include_external_resources = false
 # Increase this for very large datasets that take longer to process.
 # (optional, default: 1800)
 ckanext.downloadall.job_timeout = 1800
+
+# Name of the RQ queue that background zip generation jobs are sent to.
+# Allows you to isolate downloadall jobs onto a dedicated worker so they
+# do not compete with other CKAN background jobs.
+# Start a matching worker with:
+#   ckan -c /etc/ckan/default/ckan.ini jobs worker downloadall
+# (optional, default: "default")
+ckanext.downloadall.job_queue_name = downloadall
 ```
 
 ---

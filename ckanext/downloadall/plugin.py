@@ -2,7 +2,6 @@ import re
 
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
-from ckan.lib.jobs import DEFAULT_QUEUE_NAME
 from ckan.lib.plugins import DefaultTranslation
 
 from ckan import model
@@ -133,7 +132,7 @@ def enqueue_update_zip(dataset_name, dataset_id, operation):
         return
 
     # skip task if the dataset is already queued
-    queue = DEFAULT_QUEUE_NAME
+    queue = helpers.get_queue_name()
     jobs = toolkit.get_action('job_list')(
         {'ignore_auth': True}, {'queues': [queue]})
     if jobs:
